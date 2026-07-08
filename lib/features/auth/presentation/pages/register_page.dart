@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../../features/dashboard/presentation/pages/dashboard_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -59,8 +60,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Registrasi Berhasil!'), backgroundColor: Colors.green),
                   );
-                  // Arahkan ke Dashboard atau kembali (sesuai alur nantinya)
-                  Navigator.pop(context);
+                  // Langsung masuk ke Dashboard
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DashboardPage()),
+                    (route) => false,
+                  );
                 }
               },
               builder: (context, state) {

@@ -25,9 +25,11 @@ void main() async {
   // Inisialisasi Supabase menggunakan data dari .env
   try {
     debugPrint("Initializing Supabase...");
+    final supabaseUrl = (dotenv.env['SUPABASE_URL'] ?? '').trim();
+    final supabaseAnonKey = (dotenv.env['SUPABASE_ANON_KEY'] ?? '').trim();
     await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL'] ?? '',
-      anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
     );
     debugPrint("Supabase initialized successfully");
   } catch (e, stack) {

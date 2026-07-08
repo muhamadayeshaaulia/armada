@@ -1,7 +1,5 @@
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 // Import semua layer dari fitur Auth
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
@@ -38,8 +36,6 @@ Future<void> init() async {
 
   //! EXTERNAL (Firebase)
   final firebaseAuth = FirebaseAuth.instance;
-  final firestore = FirebaseFirestore.instance;
 
   sl.registerLazySingleton(() => firebaseAuth);
-  sl.registerLazySingleton(() => firestore);
 }

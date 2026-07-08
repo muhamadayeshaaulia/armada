@@ -4,7 +4,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_menus.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../../../features/auth/presentation/bloc/auth_event.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -140,13 +139,13 @@ class DashboardPage extends StatelessWidget {
                         ),
                       ),
 
-                      // Tombol Logout
+                      // Tombol Notifikasi
                       IconButton(
                         onPressed: () {
-                          context.read<AuthBloc>().add(LogoutRequested());
+                          // TODO: Navigasi ke halaman notifikasi
                         },
-                        icon: const Icon(Icons.logout, color: AppColors.white),
-                        tooltip: 'Keluar',
+                        icon: const Icon(Icons.notifications_none_rounded, color: AppColors.white),
+                        tooltip: 'Notifikasi',
                       ),
                     ],
                   ),

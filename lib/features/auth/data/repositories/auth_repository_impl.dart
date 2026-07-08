@@ -11,6 +11,22 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
+  Future<Either<Failure, UserEntity>> registerWithEmailAndPassword({
+    required String email,
+    required String password,
+    required String role,
+  }) async {
+    try {
+      final userModel = await remoteDataSource.registerWithEmailAndPassword(email, password, role);
+      return Right(userModel);
+    } on FirebaseAuthException catch (e) {
+      return Left(AuthFailure(e.message ?? 'Gagal melakukan registrasi'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, UserEntity>> loginWithEmailAndPassword({
     required String email,
     required String password,

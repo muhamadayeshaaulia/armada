@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; // Untuk state management
-import 'firebase_options.dart'; // Dari flutterfire configure
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'firebase_options.dart';
 
-// Import Injection Container dan BLoC Auth
 import 'injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
 void main() async {
   // Wajib dipanggil sebelum inisialisasi async lainnya
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Memuat file .env
+  await dotenv.load(fileName: ".env");
+
+  // Inisialisasi Supabase menggunakan data dari .env
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+  );
 
   // Menjalankan inisialisasi Dependency Injection (GetIt)
   await di.init();
@@ -27,7 +37,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Daftarkan AuthBloc ke tingkat paling atas (Global) menggunakan BlocProvider
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -41,12 +50,9 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F4C81)),
         ),
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('ARMADA App'),
-          ),
-          body: const Center(
-            child: Text('Firebase & Arsitektur Berhasil Terhubung!'),
+        home: const Scaffold(
+          body: Center(
+            child: Text('Firebase & Supabase Berhasil Terhubung!'),
           ),
         ),
       ),

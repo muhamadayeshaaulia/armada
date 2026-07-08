@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../../../../features/dashboard/presentation/pages/dashboard_page.dart';
+import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -57,7 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   );
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const DashboardPage()),
+                    MaterialPageRoute(builder: (context) => const MainNavigationPage()),
                     (route) => false,
                   );
                 }

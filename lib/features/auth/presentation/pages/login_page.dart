@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../../../../features/dashboard/presentation/pages/dashboard_page.dart';
+import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                   // Pindah ke Dashboard dan hapus riwayat halaman login
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const DashboardPage()),
+                    MaterialPageRoute(builder: (context) => const MainNavigationPage()),
                     (route) => false,
                   );
                 }

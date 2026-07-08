@@ -4,9 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_menus.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../../../features/auth/presentation/bloc/auth_event.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
-import '../../../../features/auth/presentation/pages/login_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -38,17 +36,7 @@ class DashboardPage extends StatelessWidget {
       onSettings: () {}, // TODO: Navigator ke halaman pengaturan
     );
 
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthInitial) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-            (route) => false,
-          );
-        }
-      },
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.backgroundPage,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,8 +179,7 @@ class DashboardPage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   // Widget kartu menu — menerima MenuItemData, bukan parameter satu-satu

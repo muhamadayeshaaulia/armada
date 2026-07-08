@@ -40,9 +40,7 @@ Future<void> init() async {
     supabaseClient: sl()),
   );
 
-  //! EXTERNAL (Firebase)
-  final firebaseAuth = FirebaseAuth.instance;
-
-  sl.registerLazySingleton(() => firebaseAuth);
-  sl.registerLazySingleton(() => Supabase.instance.client);
+  //! EXTERNAL
+  sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
+  sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 }

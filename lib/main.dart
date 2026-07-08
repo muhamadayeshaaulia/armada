@@ -11,24 +11,50 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 void main() async {
   // Wajib dipanggil sebelum inisialisasi async lainnya
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint("=== STARTING APP INITIALIZATION ===");
 
   // Memuat file .env
-  await dotenv.load(fileName: ".env");
+  try {
+    debugPrint("Loading .env file...");
+    await dotenv.load(fileName: ".env");
+    debugPrint(".env file loaded successfully");
+  } catch (e, stack) {
+    debugPrint("ERROR loading .env: $e\n$stack");
+  }
 
   // Inisialisasi Supabase menggunakan data dari .env
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL'] ?? '',
-    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-  );
-
-  // Menjalankan inisialisasi Dependency Injection (GetIt)
-  await di.init();
+  try {
+    debugPrint("Initializing Supabase...");
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL'] ?? '',
+      anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    );
+    debugPrint("Supabase initialized successfully");
+  } catch (e, stack) {
+    debugPrint("ERROR initializing Supabase: $e\n$stack");
+  }
 
   // Menjalankan inisialisasi Firebase sesuai platform berjalan
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    debugPrint("Initializing Firebase...");
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    debugPrint("Firebase initialized successfully");
+  } catch (e, stack) {
+    debugPrint("ERROR initializing Firebase: $e\n$stack");
+  }
 
+  // Menjalankan inisialisasi Dependency Injection (GetIt)
+  try {
+    debugPrint("Initializing Dependency Injection...");
+    await di.init();
+    debugPrint("Dependency Injection initialized successfully");
+  } catch (e, stack) {
+    debugPrint("ERROR initializing Dependency Injection: $e\n$stack");
+  }
+
+  debugPrint("=== APP INITIALIZATION COMPLETED ===");
   runApp(const MyApp());
 }
 

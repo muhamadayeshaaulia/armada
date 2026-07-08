@@ -4,6 +4,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../features/dashboard/presentation/pages/dashboard_page.dart';
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -168,6 +169,34 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.white,
                                 ),
                               ),
+                      ),
+                      // Membuat text dan  navigator push ke halaman register
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Belum punya akun?',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterPage(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Daftar di sini',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F4C81),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

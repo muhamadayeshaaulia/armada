@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
                   // Munculkan notifikasi lokal
                   NotificationService().showNotification(
                     id: 1,
-                    title: 'Selamat Datang Kembali! 👋',
+                    title: 'Selamat Datang Kembali!',
                     body: 'Login berhasil, Anda sekarang berada di beranda Armada.',
                   );
 

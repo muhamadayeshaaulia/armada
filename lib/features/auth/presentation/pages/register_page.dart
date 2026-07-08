@@ -4,6 +4,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
+import '../../../../core/services/notification_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -52,6 +53,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     SnackBar(content: Text(state.message), backgroundColor: Colors.red),
                   );
                 } else if (state is AuthAuthenticated) {
+                  NotificationService().showNotification(
+                    id: 2,
+                    title: 'Pendaftaran Sukses!',
+                    body: 'Selamat bergabung! Akun Anda telah berhasil dibuat.',
+                  );
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Registrasi Berhasil!'), backgroundColor: Colors.green),
                   );

@@ -10,7 +10,7 @@ abstract class AuthRemoteDataSource {
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth firebaseAuth;
-  final SupabaseClient supabaseClient; // Tambahkan Supabase Client
+  final SupabaseClient supabaseClient;
 
   AuthRemoteDataSourceImpl({
     required this.firebaseAuth,
@@ -19,9 +19,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> loginWithEmailAndPassword(String email, String password) async {
-    final userCredential = await firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-    if (userCredential.user != null) {
-      return UserModel.fromFirebaseUser(userCredential.user!);
+    final userCredential = await firebaseAuth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    final user = userCredential.user;
+
+    if (user != null) {
+      // Ambil role dari Supabase berdasarkan UID Firebase
+      final response = await supabaseClient
+          .from('users')
+          .select('role')
+          .eq('id', user.uid)
+          .maybeSingle();
+
+      final role = (response != null && response['role'] != null)
+          ? response['role'] as String
+          : 'dokter'; // fallback jika data tidak ditemukan
+
+      return UserModel(
+        uid: user.uid,
+        email: user.email ?? '',
+        role: role,
+      );
     } else {
       throw Exception('Gagal mendapatkan data pengguna');
     }
@@ -30,17 +50,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> registerWithEmailAndPassword(String email, String password, String role) async {
     // 1. Buat User di Firebase
-    final userCredential = await firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+    final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
     final user = userCredential.user;
 
     if (user != null) {
-      // 2. Simpan UID dan Role ke Supabase
+      // 2. Simpan UID, email, dan Role ke Supabase
       await supabaseClient.from('users').insert({
         'id': user.uid,
         'email': email,
         'role': role,
       });
-      return UserModel.fromFirebaseUser(user);
+
+      // 3. Kembalikan UserModel dengan role yang sebenarnya (bukan hardcode)
+      return UserModel(
+        uid: user.uid,
+        email: user.email ?? email,
+        role: role,
+      );
     } else {
       throw Exception('Gagal mendaftar pengguna baru');
     }

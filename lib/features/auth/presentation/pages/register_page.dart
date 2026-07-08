@@ -4,7 +4,6 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../features/dashboard/presentation/pages/dashboard_page.dart';
-
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -41,11 +40,6 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF0F4C81)),
-      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -136,6 +130,29 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: state is AuthLoading
                             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                             : const Text('DAFTAR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Sudah punya akun?',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Menutup halaman Register dan kembali ke Login
+                              Navigator.pop(context);
+                            },
+                            child: const Text(
+                              'Masuk di sini',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F4C81),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -6,6 +6,7 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> loginWithEmailAndPassword(String email, String password);
   Future<UserModel> registerWithEmailAndPassword(String email, String password, String role);
   Future<void> logout();
+  Future<UserModel?> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -78,5 +79,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     await firebaseAuth.signOut();
+  }
+
+  @override
+  Future<UserModel?> getCurrentUser() async {
+    final user = firebaseAuth.currentUser;
+    if (user == null) return null;
+
+    final response = await supabaseClient
+        .from('users')
+        .select('role')
+        .eq('id', user.uid)
+        .maybeSingle();
+
+    final role = (response != null && response['role'] != null)
+        ? response['role'] as String
+        : 'dokter';
+
+    return UserModel(
+      uid: user.uid,
+      email: user.email ?? '',
+      role: role,
+    );
   }
 }

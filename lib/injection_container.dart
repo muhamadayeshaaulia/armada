@@ -9,6 +9,7 @@ import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/domain/usecases/logout_usecase.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/domain/usecases/register_usecase.dart';
+import 'features/auth/domain/usecases/get_current_user_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -20,6 +21,7 @@ Future<void> init() async {
       registerUseCase: sl(),
       loginUseCase: sl(),
       logoutUseCase: sl(),
+      getCurrentUserUseCase: sl(),
     ),
   );
 
@@ -27,6 +29,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
+  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

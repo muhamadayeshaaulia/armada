@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
-import 'features/auth/presentation/pages/onboarding_page.dart';
+import 'features/auth/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
@@ -90,7 +90,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F4C81)),
         ),
-        home: const OnboardingPage(),
+        home: const SplashPage(),
       ),
     );
   }

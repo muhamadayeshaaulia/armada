@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_menus.dart';
+import '../../../../core/constants/app_text_styles.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_event.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
@@ -8,26 +11,18 @@ import '../../../../features/auth/presentation/pages/login_page.dart';
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
-  // Fungsi untuk menentukan sapaan berdasarkan jam saat ini
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour >= 3 && hour < 11) {
-      return 'Selamat Pagi,';
-    } else if (hour >= 11 && hour < 15) {
-      return 'Selamat Siang,';
-    } else if (hour >= 15 && hour < 18) {
-      return 'Selamat Sore,';
-    } else {
-      return 'Selamat Malam,';
-    }
+    if (hour >= 3 && hour < 11) return 'Selamat Pagi,';
+    if (hour >= 11 && hour < 15) return 'Selamat Siang,';
+    if (hour >= 15 && hour < 18) return 'Selamat Sore,';
+    return 'Selamat Malam,';
   }
 
-  // Fungsi untuk mengekstrak nama dari email (karena belum ada input nama)
   String _extractNameFromEmail(String email) {
     final parts = email.split('@');
-    if (parts.isNotEmpty) {
+    if (parts.isNotEmpty && parts[0].isNotEmpty) {
       final name = parts[0];
-      // Mengubah huruf pertama menjadi kapital
       return name[0].toUpperCase() + name.substring(1);
     }
     return 'Pengguna';
@@ -35,6 +30,14 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ambil daftar menu dari AppMenus (tambah navigasi di sini nanti)
+    final menus = AppMenus.getDashboardMenus(
+      onPatient: () {}, // TODO: Navigator ke halaman pasien
+      onMedicine: () {}, // TODO: Navigator ke halaman obat
+      onReport: () {}, // TODO: Navigator ke halaman laporan
+      onSettings: () {}, // TODO: Navigator ke halaman pengaturan
+    );
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthInitial) {
@@ -46,12 +49,11 @@ class DashboardPage extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[100],
-        // Kita hilangkan AppBar bawaan agar header kustom kita bisa menempel di atas
+        backgroundColor: AppColors.backgroundPage,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- HEADER CIRCULAR KUSTOM ---
+            // ── HEADER ──────────────────────────────────────────────────────
             BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
                 String email = 'Memuat...';
@@ -65,9 +67,11 @@ class DashboardPage extends StatelessWidget {
                 }
 
                 return Container(
-                  padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 32),
+                  padding: const EdgeInsets.only(
+                    top: 60, left: 24, right: 24, bottom: 32,
+                  ),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF0F4C81),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(40),
                       bottomRight: Radius.circular(40),
@@ -82,75 +86,58 @@ class DashboardPage extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      // Circular Avatar Profile
+                      // Avatar
                       Container(
-                        padding: const EdgeInsets.all(3), // Border putih
+                        padding: const EdgeInsets.all(3),
                         decoration: const BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.white,
                           shape: BoxShape.circle,
                         ),
                         child: CircleAvatar(
                           radius: 32,
                           backgroundColor: Colors.grey.shade200,
                           child: Text(
-                            name[0], // Inisial nama
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0F4C81),
+                            name[0],
+                            style: AppTextStyles.heading1.copyWith(
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Teks Sapaan & Informasi User
+
+                      // Info User
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              _getGreeting(),
-                              style: TextStyle(
-                                color: Colors.blue.shade100,
-                                fontSize: 14,
-                              ),
-                            ),
+                            Text(_getGreeting(), style: AppTextStyles.headerSubtitle),
                             const SizedBox(height: 4),
                             Text(
                               name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppTextStyles.headerTitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
                             Row(
                               children: [
+                                // Badge Role
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: AppColors.overlayLight,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text(
-                                    role,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
+                                  child: Text(role, style: AppTextStyles.labelSmall),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     email,
-                                    style: TextStyle(
-                                      color: Colors.blue.shade100,
+                                    style: AppTextStyles.headerSubtitle.copyWith(
                                       fontSize: 12,
                                     ),
                                     maxLines: 1,
@@ -162,12 +149,13 @@ class DashboardPage extends StatelessWidget {
                           ],
                         ),
                       ),
+
                       // Tombol Logout
                       IconButton(
                         onPressed: () {
                           context.read<AuthBloc>().add(LogoutRequested());
                         },
-                        icon: const Icon(Icons.logout, color: Colors.white),
+                        icon: const Icon(Icons.logout, color: AppColors.white),
                         tooltip: 'Keluar',
                       ),
                     ],
@@ -176,21 +164,14 @@ class DashboardPage extends StatelessWidget {
               },
             ),
 
-            // --- MENU UTAMA ---
+            // ── MENU UTAMA ──────────────────────────────────────────────────
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Menu Utama',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F4C81),
-                      ),
-                    ),
+                    Text('Menu Utama', style: AppTextStyles.heading3),
                     const SizedBox(height: 16),
                     Expanded(
                       child: GridView.count(
@@ -198,36 +179,10 @@ class DashboardPage extends StatelessWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        children: [
-                          _buildMenuCard(
-                            context,
-                            icon: Icons.people_alt_rounded,
-                            title: 'Data Pasien',
-                            color: Colors.blue,
-                            onTap: () {},
-                          ),
-                          _buildMenuCard(
-                            context,
-                            icon: Icons.medication_rounded,
-                            title: 'Data Obat',
-                            color: Colors.green,
-                            onTap: () {},
-                          ),
-                          _buildMenuCard(
-                            context,
-                            icon: Icons.analytics_rounded,
-                            title: 'Laporan',
-                            color: Colors.orange,
-                            onTap: () {},
-                          ),
-                          _buildMenuCard(
-                            context,
-                            icon: Icons.settings_rounded,
-                            title: 'Pengaturan',
-                            color: Colors.grey.shade600,
-                            onTap: () {},
-                          ),
-                        ],
+                        // Tinggal loop dari AppMenus — tidak ada hardcode di sini
+                        children: menus
+                            .map((menu) => _buildMenuCard(menu))
+                            .toList(),
                       ),
                     ),
                   ],
@@ -240,17 +195,18 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuCard(BuildContext context, {required IconData icon, required String title, required Color color, required VoidCallback onTap}) {
+  // Widget kartu menu — menerima MenuItemData, bukan parameter satu-satu
+  Widget _buildMenuCard(MenuItemData menu) {
     return InkWell(
-      onTap: onTap,
+      onTap: menu.onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.1),
+              color: menu.color.withOpacity(0.12),
               spreadRadius: 2,
               blurRadius: 15,
               offset: const Offset(0, 5),
@@ -263,19 +219,15 @@ class DashboardPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: menu.color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 36, color: color),
+              child: Icon(menu.icon, size: 36, color: menu.color),
             ),
             const SizedBox(height: 12),
             Text(
-              title,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              menu.title,
+              style: AppTextStyles.labelBold,
               textAlign: TextAlign.center,
             ),
           ],

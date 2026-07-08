@@ -39,26 +39,27 @@ class DashboardPage extends StatelessWidget {
 
     return Scaffold(
         backgroundColor: AppColors.backgroundPage,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── HEADER ──────────────────────────────────────────────────────
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                String email = 'Memuat...';
-                String role = 'Memuat...';
-                String name = 'Pengguna';
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── HEADER ──────────────────────────────────────────────────────
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  String email = 'Memuat...';
+                  String role = 'Memuat...';
+                  String name = 'Pengguna';
 
-                if (state is AuthAuthenticated) {
-                  email = state.user.email;
-                  role = state.user.role.toUpperCase();
-                  name = _extractNameFromEmail(email);
-                }
+                  if (state is AuthAuthenticated) {
+                    email = state.user.email;
+                    role = state.user.role.toUpperCase();
+                    name = _extractNameFromEmail(email);
+                  }
 
-                return Container(
-                  padding: const EdgeInsets.only(
-                    top: 60, left: 24, right: 24, bottom: 32,
-                  ),
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 20,
+                    ),
                   decoration: const BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.only(
@@ -180,7 +181,8 @@ class DashboardPage extends StatelessWidget {
             ),
           ],
         ),
-      );
+      ),
+    );
   }
 
   // Widget kartu menu — menerima MenuItemData, bukan parameter satu-satu

@@ -57,74 +57,93 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         }
       },
       child: Scaffold(
-        // IndexedStack agar state setiap halaman tetap terjaga saat pindah tab
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _navItems.map((item) => item.page).toList(),
+        extendBody: true,
+        body: Stack(
+          children: [
+            // Konten halaman utama
+            IndexedStack(
+              index: _currentIndex,
+              children: _navItems.map((item) => item.page).toList(),
+            ),
+            // Navigasi Mengambang (Floating Pill)
+            Positioned(
+              left: 20,
+              right: 20,
+              bottom: 24,
+              child: SafeArea(
+                child: _buildBottomNav(),
+              ),
+            ),
+          ],
         ),
-        bottomNavigationBar: _buildBottomNav(),
       ),
     );
   }
 
   Widget _buildBottomNav() {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 30,
+            offset: const Offset(0, 8),
           ),
         ],
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
       ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(_navItems.length, (index) {
+              final item = _navItems[index];
+              final isSelected = _currentIndex == index;
 
-          // ── Styling ──
-          backgroundColor: AppColors.white,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.textHint,
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 11,
-          ),
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-
-          // ── Items (dibangun otomatis dari _navItems) ──
-          items: _navItems
-              .map(
-                (item) => BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Icon(item.icon),
+              return GestureDetector(
+                onTap: () => setState(() => _currentIndex = index),
+                behavior: HitTestBehavior.opaque,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.white : Colors.transparent,
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  activeIcon: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Icon(item.activeIcon),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isSelected ? item.activeIcon : item.icon,
+                        color: isSelected ? AppColors.primary : AppColors.white.withOpacity(0.7),
+                        size: 24,
+                      ),
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        child: SizedBox(
+                          width: isSelected ? null : 0,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Text(
+                              item.label,
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  label: item.label,
                 ),
-              )
-              .toList(),
-        ),
-      ),
+              );
+            }),
+          ),
     );
   }
 }

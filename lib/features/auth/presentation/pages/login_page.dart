@@ -4,6 +4,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
+import '../../../../core/services/notification_service.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -56,6 +57,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   );
                 } else if (state is AuthAuthenticated) {
+                  // Munculkan notifikasi lokal
+                  NotificationService().showNotification(
+                    id: 1,
+                    title: 'Selamat Datang Kembali! 👋',
+                    body: 'Login berhasil, Anda sekarang berada di beranda Armada.',
+                  );
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Login Berhasil!'),

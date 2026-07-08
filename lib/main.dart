@@ -8,10 +8,22 @@ import 'features/auth/presentation/pages/onboarding_page.dart';
 import 'injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 
+import 'core/services/notification_service.dart';
+
 void main() async {
   // Wajib dipanggil sebelum inisialisasi async lainnya
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint("=== STARTING APP INITIALIZATION ===");
+
+  // Inisialisasi dan Request Permission Notifikasi di awal buka aplikasi
+  try {
+    debugPrint("Initializing Notification Service...");
+    await NotificationService().init();
+    await NotificationService().requestPermission();
+    debugPrint("Notification Service initialized successfully");
+  } catch (e, stack) {
+    debugPrint("ERROR initializing Notification Service: $e\n$stack");
+  }
 
   // Memuat file .env
   try {

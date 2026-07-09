@@ -48,7 +48,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     return BlocListener<AuthBloc, AuthState>(
       // Logout ditangani di sini (shell) — tidak lagi di DashboardPage
       listener: (context, state) {
-        if (state is AuthInitial) {
+        if (state is AuthUnauthenticated || state is AuthInitial) {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const LoginPage()),

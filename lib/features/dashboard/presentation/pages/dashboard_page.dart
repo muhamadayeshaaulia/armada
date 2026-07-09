@@ -20,6 +20,7 @@ import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_bloc.dart
 import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_event.dart';
 import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_state.dart';
 import '../../../../features/profile/presentation/pages/account_settings_page.dart';
+import '../../../../core/services/notification_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -29,12 +30,20 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  int _unreadNotifCount = 0;
+
   @override
   void initState() {
     super.initState();
     // Dispatch events to fetch latest data for medicines and rekam medis
     context.read<MedicineBloc>().add(LoadMedicinesEvent());
     context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+    _loadUnreadNotifs();
+  }
+
+  Future<void> _loadUnreadNotifs() async {
+    final count = await NotificationService().getUnreadCount();
+    if (mounted) setState(() => _unreadNotifCount = count);
   }
 
   String _getGreeting() {
@@ -254,14 +263,45 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
 
                               // Notification Icon
-                              IconButton(
-                                icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (_) => const NotificationPage()),
-                                  );
-                                },
+                              Stack(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const NotificationPage()),
+                                      ).then((_) {
+                                        _loadUnreadNotifs();
+                                      });
+                                    },
+                                  ),
+                                  if (_unreadNotifCount > 0)
+                                    Positioned(
+                                      right: 8,
+                                      top: 8,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.error,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 16,
+                                          minHeight: 16,
+                                        ),
+                                        child: Text(
+                                          '$_unreadNotifCount',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ],
                           ),

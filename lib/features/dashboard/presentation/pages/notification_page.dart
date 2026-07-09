@@ -28,6 +28,8 @@ class _NotificationPageState extends State<NotificationPage> {
       _notifications = history;
       _isLoading = false;
     });
+    // Mark as read after loading
+    await _notificationService.markAllAsRead();
   }
 
   Future<void> _clearNotifications() async {
@@ -113,9 +115,11 @@ class _NotificationPageState extends State<NotificationPage> {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: item.isRead ? Colors.white : AppColors.primary.withOpacity(0.02),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderColor),
+                        border: Border.all(
+                          color: item.isRead ? AppColors.borderColor : AppColors.primary.withOpacity(0.3),
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.02),
@@ -130,10 +134,14 @@ class _NotificationPageState extends State<NotificationPage> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
+                              color: item.isRead ? Colors.grey.shade100 : AppColors.primary.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.notifications_rounded, color: AppColors.primary, size: 20),
+                            child: Icon(
+                              Icons.notifications_rounded,
+                              color: item.isRead ? Colors.grey.shade400 : AppColors.primary,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(

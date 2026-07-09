@@ -7,19 +7,22 @@ class NotificationHistoryItem {
   final String title;
   final String body;
   final DateTime timestamp;
+  bool isRead;
 
-  NotificationHistoryItem({required this.title, required this.body, required this.timestamp});
+  NotificationHistoryItem({required this.title, required this.body, required this.timestamp, this.isRead = false});
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'body': body,
     'timestamp': timestamp.toIso8601String(),
+    'isRead': isRead,
   };
 
   factory NotificationHistoryItem.fromJson(Map<String, dynamic> json) => NotificationHistoryItem(
     title: json['title'],
     body: json['body'],
     timestamp: DateTime.parse(json['timestamp']),
+    isRead: json['isRead'] ?? false,
   );
 }
 
@@ -114,6 +117,25 @@ class NotificationService {
       return decoded.map((e) => NotificationHistoryItem.fromJson(e)).toList();
     }
     return [];
+  }
+
+  Future<int> getUnreadCount() async {
+    final history = await getHistory();
+    return history.where((e) => !e.isRead).length;
+  }
+
+  Future<void> markAllAsRead() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? historyJson = prefs.getString(_historyKey);
+    if (historyJson != null) {
+      final List<dynamic> decoded = jsonDecode(historyJson);
+      final history = decoded.map((e) {
+        final item = NotificationHistoryItem.fromJson(e);
+        item.isRead = true;
+        return item;
+      }).toList();
+      await prefs.setString(_historyKey, jsonEncode(history.map((e) => e.toJson()).toList()));
+    }
   }
 
   Future<void> clearHistory() async {

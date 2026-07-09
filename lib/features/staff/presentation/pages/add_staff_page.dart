@@ -10,7 +10,7 @@ import '../bloc/staff_event.dart';
 
 class AddStaffPage extends StatefulWidget {
   final String initialRole;
-  
+
   const AddStaffPage({super.key, required this.initialRole});
 
   @override
@@ -31,7 +31,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
   final _alamatController = TextEditingController();
   final _spesialisController = TextEditingController();
   DateTime? _tanggalLahir;
-  
+
   late String _selectedRole;
   bool _isSaving = false;
 
@@ -142,26 +142,6 @@ class _AddStaffPageState extends State<AddStaffPage> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: _isSaving
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      ),
-                    ),
-                  )
-                : TextButton(
-                    onPressed: _onSave,
-                    child: const Text('Simpan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                  ),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -173,7 +153,6 @@ class _AddStaffPageState extends State<AddStaffPage> {
               const SizedBox(height: 12),
               _buildSectionTitle('Informasi Akun (Login)'),
               const SizedBox(height: 12),
-              
               _buildTextField(
                 controller: _emailController,
                 label: 'Email',

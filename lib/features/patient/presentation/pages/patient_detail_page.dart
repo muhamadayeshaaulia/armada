@@ -49,7 +49,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                   child: pw.Text('SURAT KETERANGAN REKAM MEDIS', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
                 ),
                 pw.Center(
-                  child: pw.Text('KLINIK PRATAMA ARMADA', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+                  child: pw.Text('KLINIK KASIH IBU', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
                 ),
                 pw.SizedBox(height: 10),
                 pw.Divider(),

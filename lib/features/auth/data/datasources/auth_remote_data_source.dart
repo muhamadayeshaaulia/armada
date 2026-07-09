@@ -48,6 +48,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
+  String _extractNameFromEmail(String email) {
+    final parts = email.split('@');
+    if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      final name = parts[0].replaceAll(RegExp(r'[._-]'), ' ');
+      return name.split(' ').map((word) {
+        if (word.isEmpty) return '';
+        return word[0].toUpperCase() + word.substring(1);
+      }).join(' ');
+    }
+    return 'Pengguna';
+  }
+
   @override
   Future<UserModel> registerWithEmailAndPassword(String email, String password, String role) async {
     // 1. Buat User di Firebase
@@ -58,14 +70,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final user = userCredential.user;
 
     if (user != null) {
-      // 2. Simpan UID, email, dan Role ke Supabase
+      // 2. Simpan UID, email, dan Role ke Supabase (tabel users)
       await supabaseClient.from('users').insert({
         'id': user.uid,
         'email': email,
         'role': role,
       });
 
-      // 3. Kembalikan UserModel dengan role yang sebenarnya (bukan hardcode)
+      // 3. Masukkan ke tabel admins / dokters sesuai dengan role agar berelasi
+      final namaLengkap = _extractNameFromEmail(email);
+      if (role == 'admin') {
+        await supabaseClient.from('admins').insert({
+          'id': user.uid,
+          'nama_lengkap': namaLengkap,
+        });
+      } else if (role == 'dokter') {
+        await supabaseClient.from('dokters').insert({
+          'id': user.uid,
+          'nama_lengkap': namaLengkap,
+          'spesialis': 'Umum', // Spesialis default karena NOT NULL di DB
+        });
+      }
+
+      // 4. Kembalikan UserModel dengan role yang sebenarnya
       return UserModel(
         uid: user.uid,
         email: user.email ?? email,

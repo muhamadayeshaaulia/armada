@@ -34,9 +34,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .eq('id', user.uid)
           .maybeSingle();
 
-      final role = (response != null && response['role'] != null)
-          ? response['role'] as String
-          : 'dokter'; // fallback jika data tidak ditemukan
+      if (response == null) {
+        // Jika data tidak ditemukan di Supabase, anggap user tidak valid (sudah dihapus)
+        await firebaseAuth.signOut();
+        throw Exception('Akun telah dinonaktifkan atau dihapus oleh Admin.');
+      }
+
+      final role = response['role'] as String;
 
       return UserModel(
         uid: user.uid,
@@ -119,9 +123,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         .eq('id', user.uid)
         .maybeSingle();
 
-    final role = (response != null && response['role'] != null)
-        ? response['role'] as String
-        : 'dokter';
+    if (response == null) {
+      // User sudah dihapus di Supabase tapi masih nyangkut di Firebase Auth
+      await firebaseAuth.signOut();
+      return null;
+    }
+
+    final role = response['role'] as String;
 
     return UserModel(
       uid: user.uid,

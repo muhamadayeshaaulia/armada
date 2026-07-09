@@ -7,7 +7,6 @@ import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/notification_prefs.dart';
 import '../../../../core/constants/app_colors.dart';
-import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

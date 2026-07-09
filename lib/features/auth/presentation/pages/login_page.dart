@@ -282,33 +282,6 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                       ),
                       // Membuat text dan  navigator push ke halaman register
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Belum punya akun?',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RegisterPage(),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              'Daftar di sini',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 );

@@ -5,6 +5,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/notification_prefs.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -47,17 +48,20 @@ class _RegisterPageState extends State<RegisterPage> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
+              listener: (context, state) async {
                 if (state is AuthError) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(state.message), backgroundColor: Colors.red),
                   );
                 } else if (state is AuthAuthenticated) {
-                  NotificationService().showNotification(
-                    id: 2,
-                    title: 'Pendaftaran Sukses!',
-                    body: 'Selamat bergabung! Akun Anda telah berhasil dibuat.',
-                  );
+                  final registerNotifEnabled = await NotificationPrefs.isRegisterNotifEnabled();
+                  if (registerNotifEnabled) {
+                    NotificationService().showNotification(
+                      id: 2,
+                      title: 'Pendaftaran Sukses!',
+                      body: 'Selamat bergabung! Akun Anda telah berhasil dibuat.',
+                    );
+                  }
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Registrasi Berhasil!'), backgroundColor: Colors.green),

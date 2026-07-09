@@ -5,6 +5,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/notification_prefs.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -47,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
+              listener: (context, state) async {
                 if (state is AuthError) {
                   // Tampilkan pesan error jika login gagal
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -59,12 +60,15 @@ class _LoginPageState extends State<LoginPage> {
                 } else if (state is AuthAuthenticated) {
                   // Cek apakah halaman ini aktif teratas untuk menghindari bentrok dengan RegisterPage
                   if (ModalRoute.of(context)?.isCurrent ?? false) {
-                    // Munculkan notifikasi lokal
-                    NotificationService().showNotification(
-                      id: 1,
-                      title: 'Selamat Datang Kembali!',
-                      body: 'Login berhasil, Anda sekarang berada di beranda Armada.',
-                    );
+                    // Tampilkan notifikasi hanya jika diizinkan pengguna
+                    final loginNotifEnabled = await NotificationPrefs.isLoginNotifEnabled();
+                    if (loginNotifEnabled) {
+                      NotificationService().showNotification(
+                        id: 1,
+                        title: 'Selamat Datang Kembali!',
+                        body: 'Login berhasil, Anda sekarang berada di beranda Armada.',
+                      );
+                    }
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

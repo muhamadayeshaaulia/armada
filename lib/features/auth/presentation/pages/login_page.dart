@@ -22,6 +22,9 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   AuthError? _authError;
 
+  /// State terpisah: email terbukti ada di Firebase (bertahan saat user mengetik password)
+  bool _emailIsVerified = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -29,9 +32,8 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  /// Email menunjukkan centang hijau HANYA saat error-nya ada di password saja
-  bool get _emailVerified =>
-      _authError != null && _authError!.errorType == AuthErrorType.password;
+  /// Centang hijau muncul jika email sudah terverifikasi (dari attempt sebelumnya)
+  bool get _emailVerified => _emailIsVerified;
 
   /// Error di field email: jika tipe error 'email' atau 'both'
   String? get _emailErrorText {
@@ -52,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   void _onLoginPressed() {
     setState(() {
       _authError = null;
+      // Jangan reset _emailIsVerified — dipertahankan hingga email berubah
     });
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
@@ -101,6 +104,14 @@ class _LoginPageState extends State<LoginPage> {
                   } else {
                     setState(() {
                       _authError = state;
+                      // Jika hanya password yang salah → tandai email sebagai terverifikasi
+                      // (centang hijau akan tetap tampil meski user mengetik di password)
+                      if (state.errorType == AuthErrorType.password) {
+                        _emailIsVerified = true;
+                      } else {
+                        // Email salah atau keduanya → hapus status verifikasi
+                        _emailIsVerified = false;
+                      }
                     });
                     // Trigger ulang validator agar error muncul di dalam field
                     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -146,9 +157,12 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (_) {
-                          if (_authError != null) {
-                            setState(() { _authError = null; });
-                          }
+                          // Jika email berubah: reset SEMUA state termasuk verifikasi email
+                          setState(() {
+                            _authError = null;
+                            _emailIsVerified = false;
+                          });
+                          _formKey.currentState?.validate();
                         },
                         decoration: InputDecoration(
                           labelText: 'Email',
@@ -198,8 +212,11 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _passwordController,
                         obscureText: true,
                         onChanged: (_) {
+                          // Password berubah: hanya hapus auth error, JANGAN hapus _emailIsVerified
+                          // supaya centang hijau di email tetap tampil
                           if (_authError != null) {
                             setState(() { _authError = null; });
+                            _formKey.currentState?.validate();
                           }
                         },
                         decoration: InputDecoration(

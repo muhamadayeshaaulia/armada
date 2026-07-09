@@ -49,9 +49,6 @@ class AuthRepositoryImpl implements AuthRepository {
           (e.message?.toLowerCase().contains('incorrect') ?? false) ||
           (e.message?.toLowerCase().contains('malformed') ?? false) ||
           (e.message?.toLowerCase().contains('expired') ?? false)) {
-        // Firebase SDK modern (v6+) menggabungkan semua kegagalan login ke 'invalid-credential'
-        // → Gunakan sendPasswordResetEmail untuk cek apakah email terdaftar
-        //   (tidak benar-benar mengirim email karena kita tidak pernah konfirmasi ke user)
         try {
           await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
           // Jika tidak ada exception → email terdaftar → password yang salah

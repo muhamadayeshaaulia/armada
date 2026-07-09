@@ -75,148 +75,151 @@ class _StaffPageState extends State<StaffPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundPage,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── HEADER ──────────────────────────────────────────────────────
-            Container(
-              width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(28),
-                  bottomRight: Radius.circular(28),
-                ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── HEADER ──────────────────────────────────────────────────────
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Data Petugas', style: AppTextStyles.headerTitle),
-                  const SizedBox(height: 4),
-                  Text('Kelola admin & dokter praktik',
-                      style: AppTextStyles.headerSubtitle),
-                  const SizedBox(height: 20),
-                  // Toggle Slider Role
-                  Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Background slider animasi
-                        AnimatedAlign(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOutCubic,
-                          alignment: _selectedRole == 'dokter'
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: FractionallySizedBox(
-                            widthFactor: 0.5,
-                            child: Container(
-                              margin: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Data Petugas', style: AppTextStyles.headerTitle),
+                    const SizedBox(height: 4),
+                    Text('Kelola admin & dokter praktik',
+                        style: AppTextStyles.headerSubtitle),
+                    const SizedBox(height: 20),
+                    // Toggle Slider Role
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Background slider animasi
+                          AnimatedAlign(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOutCubic,
+                            alignment: _selectedRole == 'dokter'
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: FractionallySizedBox(
+                              widthFactor: 0.5,
+                              child: Container(
+                                margin: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
-                        // Lapisan tombol
-                        SizedBox.expand(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Tombol Admin
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _selectedRole = 'admin'),
-                                  behavior: HitTestBehavior.opaque,
-                                  child: TweenAnimationBuilder<Color?>(
-                                    tween: ColorTween(
-                                      begin: _selectedRole == 'admin' ? Colors.white : AppColors.primary,
-                                      end: _selectedRole == 'admin' ? AppColors.primary : Colors.white,
-                                    ),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                    builder: (context, color, _) {
-                                      return Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.admin_panel_settings_rounded, color: color, size: 18),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Admin',
-                                            style: TextStyle(
-                                              color: color,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
+                          // Lapisan tombol
+                          SizedBox.expand(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Tombol Admin
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _selectedRole = 'admin'),
+                                    behavior: HitTestBehavior.opaque,
+                                    child: TweenAnimationBuilder<Color?>(
+                                      tween: ColorTween(
+                                        begin: _selectedRole == 'admin' ? Colors.white : AppColors.primary,
+                                        end: _selectedRole == 'admin' ? AppColors.primary : Colors.white,
+                                      ),
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeInOut,
+                                      builder: (context, color, _) {
+                                        return Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.admin_panel_settings_rounded, color: color, size: 18),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'Admin',
+                                              style: TextStyle(
+                                                color: color,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                          ],
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                              // Tombol Dokter
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _selectedRole = 'dokter'),
-                                  behavior: HitTestBehavior.opaque,
-                                  child: TweenAnimationBuilder<Color?>(
-                                    tween: ColorTween(
-                                      begin: _selectedRole == 'dokter' ? Colors.white : AppColors.primary,
-                                      end: _selectedRole == 'dokter' ? AppColors.primary : Colors.white,
-                                    ),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                    builder: (context, color, _) {
-                                      return Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.medical_services_rounded, color: color, size: 18),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Dokter',
-                                            style: TextStyle(
-                                              color: color,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
+                                // Tombol Dokter
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _selectedRole = 'dokter'),
+                                    behavior: HitTestBehavior.opaque,
+                                    child: TweenAnimationBuilder<Color?>(
+                                      tween: ColorTween(
+                                        begin: _selectedRole == 'dokter' ? Colors.white : AppColors.primary,
+                                        end: _selectedRole == 'dokter' ? AppColors.primary : Colors.white,
+                                      ),
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeInOut,
+                                      builder: (context, color, _) {
+                                        return Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.medical_services_rounded, color: color, size: 18),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'Dokter',
+                                              style: TextStyle(
+                                                color: color,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                          ],
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
+          ),
 
-            // ── CONTENT ─────────────────────────────────────────────────────
-            Expanded(
+          // ── CONTENT ─────────────────────────────────────────────────────
+          Expanded(
               child: BlocConsumer<StaffBloc, StaffState>(
                 listener: (context, state) {
                   // state changes handled silently
@@ -285,7 +288,6 @@ class _StaffPageState extends State<StaffPage> {
             ),
           ],
         ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

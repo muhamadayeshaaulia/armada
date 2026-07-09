@@ -8,6 +8,8 @@ import '../bloc/patient_event.dart';
 import '../bloc/patient_state.dart';
 import 'add_patient_page.dart';
 import 'patient_detail_page.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 
 class PatientPage extends StatefulWidget {
   const PatientPage({super.key});
@@ -63,6 +65,12 @@ class _PatientPageState extends State<PatientPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    bool isDokter = false;
+    if (authState is AuthAuthenticated) {
+      isDokter = authState.user.role.toLowerCase() == 'dokter';
+    }
+
     return Scaffold(
       backgroundColor: AppColors.backgroundPage,
       body: Column(
@@ -252,21 +260,23 @@ class _PatientPageState extends State<PatientPage> {
                                     ),
 
                                     // Action buttons
-                                    IconButton(
-                                      icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => AddPatientPage(patient: p),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
-                                      onPressed: () => _showDeleteDialog(p),
-                                    ),
+                                    if (!isDokter) ...[
+                                      IconButton(
+                                        icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => AddPatientPage(patient: p),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+                                        onPressed: () => _showDeleteDialog(p),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -283,7 +293,7 @@ class _PatientPageState extends State<PatientPage> {
             ),
           ],
         ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isDokter ? null : FloatingActionButton(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

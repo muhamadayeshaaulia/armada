@@ -425,7 +425,7 @@ class _LaporanPageState extends State<LaporanPage> {
                                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                                                     ),
                                                     Text(
-                                                      resep.aturanMinum,
+                                                      resep.aturanMinum + (resep.dosis != null && resep.dosis!.isNotEmpty ? ' - Dosis: ${resep.dosis}' : ''),
                                                       style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
                                                     ),
                                                   ],

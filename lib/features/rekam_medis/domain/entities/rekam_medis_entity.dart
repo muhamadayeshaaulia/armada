@@ -5,6 +5,7 @@ class ResepObatEntity {
   final String rekamMedisId;
   final String obatId;
   final String aturanMinum;
+  final String? dosis;
   final int jumlahDiberikan;
   final MedicineEntity? obat;
 
@@ -13,6 +14,7 @@ class ResepObatEntity {
     required this.rekamMedisId,
     required this.obatId,
     required this.aturanMinum,
+    this.dosis,
     required this.jumlahDiberikan,
     this.obat,
   });

@@ -61,6 +61,7 @@ class RekamMedisRemoteDataSourceImpl implements RekamMedisRemoteDataSource {
         'rekam_medis_id': rekamMedisId,
         'obat_id': resep.obatId,
         'aturan_minum': resep.aturanMinum,
+        'dosis': resep.dosis,
         'jumlah_diberikan': resep.jumlahDiberikan,
       }).toList();
 
@@ -161,6 +162,7 @@ class RekamMedisRemoteDataSourceImpl implements RekamMedisRemoteDataSource {
         'rekam_medis_id': record.id,
         'obat_id': resep.obatId,
         'aturan_minum': resep.aturanMinum,
+        'dosis': resep.dosis,
         'jumlah_diberikan': resep.jumlahDiberikan,
       }).toList();
 

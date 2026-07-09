@@ -120,6 +120,7 @@ class _ResepObatPageState extends State<ResepObatPage> {
                             final qty = r['jumlah_diberikan'] ?? 0;
                             final unit = r['obats']?['satuan'] ?? '';
                             final aturan = r['aturan_minum'] ?? '-';
+                            final dosis = r['dosis']?.toString() ?? '';
                             final dateStr = r['created_at'] != null
                                 ? DateTime.parse(r['created_at'] as String).toLocal().toString().substring(0, 10)
                                 : '-';
@@ -153,7 +154,7 @@ class _ResepObatPageState extends State<ResepObatPage> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text('Pasien: $patientName', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                                        Text('Dosis: $aturan', style: AppTextStyles.bodySmall.copyWith(fontSize: 11)),
+                                        Text('Aturan: $aturan' + (dosis.isNotEmpty ? ' - Dosis: $dosis' : ''), style: AppTextStyles.bodySmall.copyWith(fontSize: 11)),
                                         Text('Tgl Resep: $dateStr', style: AppTextStyles.bodySmall.copyWith(fontSize: 10)),
                                       ],
                                     ),

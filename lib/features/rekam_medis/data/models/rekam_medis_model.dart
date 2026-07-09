@@ -7,6 +7,7 @@ class ResepObatModel extends ResepObatEntity {
     required super.rekamMedisId,
     required super.obatId,
     required super.aturanMinum,
+    super.dosis,
     required super.jumlahDiberikan,
     super.obat,
   });
@@ -17,6 +18,7 @@ class ResepObatModel extends ResepObatEntity {
       rekamMedisId: json['rekam_medis_id'] as String,
       obatId: json['obat_id'] as String,
       aturanMinum: json['aturan_minum'] as String,
+      dosis: json['dosis'] as String?,
       jumlahDiberikan: json['jumlah_diberikan'] as int,
       obat: json['obats'] != null ? MedicineModel.fromJson(json['obats'] as Map<String, dynamic>) : null,
     );
@@ -27,6 +29,7 @@ class ResepObatModel extends ResepObatEntity {
       'rekam_medis_id': rekamMedisId,
       'obat_id': obatId,
       'aturan_minum': aturanMinum,
+      'dosis': dosis,
       'jumlah_diberikan': jumlahDiberikan,
     };
   }

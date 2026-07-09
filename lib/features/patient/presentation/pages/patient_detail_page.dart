@@ -121,7 +121,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                   pw.Text('Resep Obat:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13)),
                   pw.SizedBox(height: 8),
                   ...r.resepList!.map((resep) => pw.Bullet(
-                        text: '${resep.obat?.namaObat ?? 'Obat'} - Aturan: ${resep.aturanMinum} (Jml: ${resep.jumlahDiberikan} ${resep.obat?.satuan ?? ''})',
+                        text: '${resep.obat?.namaObat ?? 'Obat'} - Aturan: ${resep.aturanMinum}${resep.dosis != null && resep.dosis!.isNotEmpty ? ' (Dosis: ${resep.dosis})' : ''} (Jml: ${resep.jumlahDiberikan} ${resep.obat?.satuan ?? ''})',
                         style: const pw.TextStyle(fontSize: 11),
                       )),
                 ],
@@ -400,7 +400,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                                                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                                                       ),
                                                       Text(
-                                                        resep.aturanMinum,
+                                                        resep.aturanMinum + (resep.dosis != null && resep.dosis!.isNotEmpty ? ' - Dosis: ${resep.dosis}' : ''),
                                                         style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
                                                       ),
                                                     ],

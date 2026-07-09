@@ -23,17 +23,21 @@ class PrescriptionInput {
   MedicineEntity? selectedObat;
   final TextEditingController aturanController;
   final TextEditingController jumlahController;
+  final TextEditingController dosisController;
 
   PrescriptionInput({
     this.selectedObat,
     String aturan = '3 x 1 Sehari',
     String jumlah = '10',
+    String dosis = '',
   })  : aturanController = TextEditingController(text: aturan),
-        jumlahController = TextEditingController(text: jumlah);
+        jumlahController = TextEditingController(text: jumlah),
+        dosisController = TextEditingController(text: dosis);
 
   void dispose() {
     aturanController.dispose();
     jumlahController.dispose();
+    dosisController.dispose();
   }
 }
 
@@ -81,6 +85,7 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
               selectedObat: resep.obat,
               aturan: resep.aturanMinum,
               jumlah: resep.jumlahDiberikan.toString(),
+              dosis: resep.dosis ?? '',
             ),
           );
         }
@@ -164,6 +169,7 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
           rekamMedisId: widget.record?.id ?? '',
           obatId: input.selectedObat!.id,
           aturanMinum: input.aturanController.text.trim(),
+          dosis: input.dosisController.text.trim(),
           jumlahDiberikan: qty,
           obat: input.selectedObat,
         ),
@@ -514,14 +520,13 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
                                   ),
                                   const SizedBox(height: 12),
 
-                                  // Aturan Minum & Jumlah
+                                  // Aturan Minum & Dosis
                                   Row(
                                     children: [
                                       Expanded(
-                                        flex: 2,
                                         child: TextFormField(
                                           controller: input.aturanController,
-                                          validator: (v) => v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
+                                          validator: (v) => v == null || v.trim().isEmpty ? 'Wajib' : null,
                                           decoration: InputDecoration(
                                             labelText: 'Aturan Minum',
                                             prefixIcon: const Icon(Icons.schedule_rounded, size: 18),
@@ -532,20 +537,29 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
-                                        flex: 1,
                                         child: TextFormField(
-                                          controller: input.jumlahController,
-                                          keyboardType: TextInputType.number,
-                                          validator: (v) => v == null || v.trim().isEmpty ? 'Wajib' : null,
+                                          controller: input.dosisController,
                                           decoration: InputDecoration(
-                                            labelText: 'Jumlah',
-                                            prefixIcon: const Icon(Icons.pin_rounded, size: 18),
+                                            labelText: 'Dosis',
+                                            prefixIcon: const Icon(Icons.science_rounded, size: 18),
                                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                           ),
                                         ),
                                       ),
                                     ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: input.jumlahController,
+                                    keyboardType: TextInputType.number,
+                                    validator: (v) => v == null || v.trim().isEmpty ? 'Wajib' : null,
+                                    decoration: InputDecoration(
+                                      labelText: 'Jumlah Diberikan',
+                                      prefixIcon: const Icon(Icons.pin_rounded, size: 18),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
                                   ),
                                 ],
                               ),

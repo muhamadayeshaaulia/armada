@@ -48,6 +48,7 @@ class RekamMedisRepositoryImpl implements RekamMedisRepository {
         rekamMedisId: resep.rekamMedisId,
         obatId: resep.obatId,
         aturanMinum: resep.aturanMinum,
+        dosis: resep.dosis,
         jumlahDiberikan: resep.jumlahDiberikan,
       )).toList();
 
@@ -76,6 +77,7 @@ class RekamMedisRepositoryImpl implements RekamMedisRepository {
         rekamMedisId: resep.rekamMedisId,
         obatId: resep.obatId,
         aturanMinum: resep.aturanMinum,
+        dosis: resep.dosis,
         jumlahDiberikan: resep.jumlahDiberikan,
       )).toList();
 

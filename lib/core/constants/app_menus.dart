@@ -31,6 +31,12 @@ class AppMenus {
   }) {
     return [
       MenuItemData(
+        icon: Icons.badge_rounded,
+        title: 'Data Petugas',
+        color: const Color(0xFF9C27B0),
+        onTap: onStaff,
+      ),
+      MenuItemData(
         icon: Icons.people_alt_rounded,
         title: 'Data Pasien',
         color: AppColors.menuPatient,
@@ -43,10 +49,10 @@ class AppMenus {
         onTap: onMedicine,
       ),
       MenuItemData(
-        icon: Icons.analytics_rounded,
-        title: 'Laporan',
-        color: AppColors.menuReport,
-        onTap: onReport,
+        icon: Icons.receipt_long_rounded,
+        title: 'Resep Obat',
+        color: Colors.amber,
+        onTap: onResepObat,
       ),
       MenuItemData(
         icon: Icons.assignment_outlined,
@@ -55,16 +61,10 @@ class AppMenus {
         onTap: onRekamMedis,
       ),
       MenuItemData(
-        icon: Icons.receipt_long_rounded,
-        title: 'Resep Obat',
-        color: Colors.amber,
-        onTap: onResepObat,
-      ),
-      MenuItemData(
-        icon: Icons.badge_rounded,
-        title: 'Data Petugas',
-        color: const Color(0xFF9C27B0),
-        onTap: onStaff,
+        icon: Icons.analytics_rounded,
+        title: 'Laporan',
+        color: AppColors.menuReport,
+        onTap: onReport,
       ),
     ];
   }

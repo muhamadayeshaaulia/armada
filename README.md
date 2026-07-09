@@ -1,6 +1,6 @@
 # ARMADA (Aplikasi Rekam Medis dan Data Obat)
 
-A new Flutter project.
+Aplikasi ini di buat untuk rekam meedis dan data obat untuk klinik kasih ibu, dan bertujuan untuk memenuhi kebutuhan sitem informasi antara admin dan dokter
 
 ## Getting Started
 

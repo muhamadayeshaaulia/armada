@@ -81,6 +81,7 @@ class _DashboardPageState extends State<DashboardPage> {
           MaterialPageRoute(builder: (_) => const PatientPage()),
         ).then((_) {
           context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+          _loadUnreadNotifs();
         });
       },
       onMedicine: () {
@@ -89,6 +90,7 @@ class _DashboardPageState extends State<DashboardPage> {
           MaterialPageRoute(builder: (_) => const MedicinePage()),
         ).then((_) {
           context.read<MedicineBloc>().add(LoadMedicinesEvent());
+          _loadUnreadNotifs();
         });
       },
       onReport: () {
@@ -97,6 +99,7 @@ class _DashboardPageState extends State<DashboardPage> {
           MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Laporan Rekam Medis')),
         ).then((_) {
           context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+          _loadUnreadNotifs();
         });
       },
       onRekamMedis: () {
@@ -105,19 +108,24 @@ class _DashboardPageState extends State<DashboardPage> {
           MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Rekam Medis')),
         ).then((_) {
           context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+          _loadUnreadNotifs();
         });
       },
       onResepObat: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const ResepObatPage()),
-        );
+        ).then((_) {
+          _loadUnreadNotifs();
+        });
       },
       onStaff: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const StaffPage()),
-        );
+        ).then((_) {
+          _loadUnreadNotifs();
+        });
       },
     );
 
@@ -320,6 +328,7 @@ class _DashboardPageState extends State<DashboardPage> {
               onRefresh: () async {
                 context.read<MedicineBloc>().add(LoadMedicinesEvent());
                 context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+                _loadUnreadNotifs();
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),

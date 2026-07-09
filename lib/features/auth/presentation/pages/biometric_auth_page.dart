@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_auth/local_auth.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/notification_prefs.dart';
 import '../../presentation/bloc/auth_bloc.dart';

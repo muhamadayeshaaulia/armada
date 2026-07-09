@@ -32,6 +32,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
   final _noTelpController = TextEditingController();
   final _alamatController = TextEditingController();
   final _spesialisController = TextEditingController();
+  bool _isPasswordVisible = false;
   DateTime? _tanggalLahir;
 
   late String _selectedRole;
@@ -159,7 +160,18 @@ class _AddStaffPageState extends State<AddStaffPage> {
                 controller: _passwordController,
                 label: 'Password',
                 icon: Icons.lock_outline,
-                obscure: true,
+                obscure: !_isPasswordVisible,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    color: AppColors.textSecondary,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
                 validator: (v) => v == null || v.length < 6 ? 'Minimal 6 karakter' : null,
               ),
 
@@ -281,6 +293,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
     TextInputType keyboard = TextInputType.text,
     int maxLines = 1,
     bool obscure = false,
+    Widget? suffixIcon,
   }) {
     return TextFormField(
       controller: controller,
@@ -292,6 +305,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
         labelText: label,
         hintText: hint,
         prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(

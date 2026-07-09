@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   AuthError? _authError;
+  bool _isPasswordVisible = false;
 
   /// State terpisah: email terbukti ada di Firebase (bertahan saat user mengetik password)
   bool _emailIsVerified = false;
@@ -209,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Input Password
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible,
                         onChanged: (_) {
                           // Password berubah: hanya hapus auth error, JANGAN hapus _emailIsVerified
                           // supaya centang hijau di email tetap tampil
@@ -221,6 +222,17 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

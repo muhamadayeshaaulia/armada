@@ -60,4 +60,25 @@ class StaffRepositoryImpl implements StaffRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> addStaff(StaffEntity staff, String email, String password) async {
+    try {
+      final model = StaffModel(
+        id: staff.id,
+        namaLengkap: staff.namaLengkap,
+        tempatLahir: staff.tempatLahir,
+        tanggalLahir: staff.tanggalLahir,
+        noTelp: staff.noTelp,
+        alamat: staff.alamat,
+        role: staff.role,
+        spesialis: staff.spesialis,
+        createdAt: staff.createdAt,
+      );
+      await remoteDataSource.addStaff(model, email, password);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

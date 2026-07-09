@@ -3,44 +3,40 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../domain/entities/staff_entity.dart';
-import '../../data/models/staff_model.dart';
 import '../../../../injection_container.dart' as di;
-import '../../domain/usecases/update_staff_usecase.dart';
+import '../../domain/usecases/add_staff_usecase.dart';
 import '../bloc/staff_bloc.dart';
 import '../bloc/staff_event.dart';
 
-class EditStaffPage extends StatefulWidget {
-  final StaffEntity staff;
-
-  const EditStaffPage({super.key, required this.staff});
+class AddStaffPage extends StatefulWidget {
+  const AddStaffPage({super.key});
 
   @override
-  State<EditStaffPage> createState() => _EditStaffPageState();
+  State<AddStaffPage> createState() => _AddStaffPageState();
 }
 
-class _EditStaffPageState extends State<EditStaffPage> {
+class _AddStaffPageState extends State<AddStaffPage> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _namaController;
-  late final TextEditingController _tempatLahirController;
-  late final TextEditingController _noTelpController;
-  late final TextEditingController _alamatController;
-  late final TextEditingController _spesialisController;
+
+  // Auth fields
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  // Profile fields
+  final _namaController = TextEditingController();
+  final _tempatLahirController = TextEditingController();
+  final _noTelpController = TextEditingController();
+  final _alamatController = TextEditingController();
+  final _spesialisController = TextEditingController();
   DateTime? _tanggalLahir;
+  
+  String _selectedRole = 'dokter';
   bool _isSaving = false;
 
   @override
-  void initState() {
-    super.initState();
-    _namaController = TextEditingController(text: widget.staff.namaLengkap);
-    _tempatLahirController = TextEditingController(text: widget.staff.tempatLahir ?? '');
-    _noTelpController = TextEditingController(text: widget.staff.noTelp ?? '');
-    _alamatController = TextEditingController(text: widget.staff.alamat ?? '');
-    _spesialisController = TextEditingController(text: widget.staff.spesialis ?? '');
-    _tanggalLahir = widget.staff.tanggalLahir;
-  }
-
-  @override
   void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
     _namaController.dispose();
     _tempatLahirController.dispose();
     _noTelpController.dispose();
@@ -52,7 +48,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _tanggalLahir ?? DateTime(1990),
+      initialDate: DateTime(1990),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (ctx, child) => Theme(
@@ -70,8 +66,8 @@ class _EditStaffPageState extends State<EditStaffPage> {
 
     setState(() => _isSaving = true);
 
-    final updatedStaff = StaffModel(
-      id: widget.staff.id,
+    final newStaff = StaffEntity(
+      id: '', // Will be filled by Firebase UID in data source
       namaLengkap: _namaController.text.trim(),
       tempatLahir: _tempatLahirController.text.trim().isNotEmpty
           ? _tempatLahirController.text.trim()
@@ -83,18 +79,17 @@ class _EditStaffPageState extends State<EditStaffPage> {
       alamat: _alamatController.text.trim().isNotEmpty
           ? _alamatController.text.trim()
           : null,
-      role: widget.staff.role,
-      spesialis: widget.staff.role == 'dokter'
+      role: _selectedRole,
+      spesialis: _selectedRole == 'dokter'
           ? (_spesialisController.text.trim().isNotEmpty
               ? _spesialisController.text.trim()
               : 'Umum')
           : null,
-      createdAt: widget.staff.createdAt,
+      createdAt: DateTime.now(),
     );
 
-    // Panggil langsung use case — tidak bergantung pada BLoC agar tidak race condition
-    final useCase = di.sl<UpdateStaffUseCase>();
-    final result = await useCase(updatedStaff);
+    final useCase = di.sl<AddStaffUseCase>();
+    final result = await useCase(newStaff, _emailController.text.trim(), _passwordController.text.trim());
 
     if (!mounted) return;
     setState(() => _isSaving = false);
@@ -103,19 +98,19 @@ class _EditStaffPageState extends State<EditStaffPage> {
       (failure) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal menyimpan: ${failure.message}'),
+            content: Text('Gagal menambahkan: ${failure.message}'),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
       },
       (_) {
-        // Reload data di StaffPage
+        // Reload data
         context.read<StaffBloc>().add(LoadStaffEvent());
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Data berhasil diperbarui!'),
+            content: const Text('Petugas berhasil ditambahkan!'),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -127,17 +122,14 @@ class _EditStaffPageState extends State<EditStaffPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDokter = widget.staff.role == 'dokter';
+    final isDokter = _selectedRole == 'dokter';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundPage,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: Text(
-          'Edit ${isDokter ? 'Dokter' : 'Admin'}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Tambah Petugas', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
         actions: [
           Padding(
@@ -149,20 +141,13 @@ class _EditStaffPageState extends State<EditStaffPage> {
                       child: SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       ),
                     ),
                   )
                 : TextButton(
                     onPressed: _onSave,
-                    child: const Text(
-                      'Simpan',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15),
-                    ),
+                    child: const Text('Simpan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
                   ),
           ),
         ],
@@ -174,37 +159,113 @@ class _EditStaffPageState extends State<EditStaffPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar section
-              Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  decoration: BoxDecoration(
-                    color: (isDokter ? AppColors.info : AppColors.menuReport)
-                        .withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      _namaController.text.isNotEmpty
-                          ? _namaController.text
-                              .split(' ')
-                              .take(2)
-                              .map((e) => e.isNotEmpty ? e[0] : '')
-                              .join()
-                              .toUpperCase()
-                          : '?',
-                      style: TextStyle(
-                        color: isDokter ? AppColors.info : AppColors.menuReport,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
+              // Role Selector
+              _buildSectionTitle('Pilih Peran'),
+              const SizedBox(height: 12),
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.borderColor),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedAlign(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: _selectedRole == 'dokter'
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: FractionallySizedBox(
+                        widthFactor: 0.5,
+                        child: Container(
+                          margin: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    SizedBox.expand(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _selectedRole = 'admin'),
+                              behavior: HitTestBehavior.opaque,
+                              child: TweenAnimationBuilder<Color?>(
+                                tween: ColorTween(
+                                  begin: _selectedRole == 'admin' ? AppColors.primary : Colors.white,
+                                  end: _selectedRole == 'admin' ? Colors.white : AppColors.textSecondary,
+                                ),
+                                duration: const Duration(milliseconds: 300),
+                                builder: (context, color, _) {
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.admin_panel_settings, color: color, size: 18),
+                                      const SizedBox(width: 6),
+                                      Text('Admin', style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _selectedRole = 'dokter'),
+                              behavior: HitTestBehavior.opaque,
+                              child: TweenAnimationBuilder<Color?>(
+                                tween: ColorTween(
+                                  begin: _selectedRole == 'dokter' ? AppColors.primary : Colors.white,
+                                  end: _selectedRole == 'dokter' ? Colors.white : AppColors.textSecondary,
+                                ),
+                                duration: const Duration(milliseconds: 300),
+                                builder: (context, color, _) {
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.medical_services, color: color, size: 18),
+                                      const SizedBox(width: 6),
+                                      Text('Dokter', style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
+              const SizedBox(height: 24),
+              _buildSectionTitle('Informasi Akun (Login)'),
+              const SizedBox(height: 12),
+              
+              _buildTextField(
+                controller: _emailController,
+                label: 'Email',
+                icon: Icons.email_outlined,
+                keyboard: TextInputType.emailAddress,
+                validator: (v) => v == null || !v.contains('@') ? 'Email tidak valid' : null,
+              ),
+              const SizedBox(height: 12),
+              _buildTextField(
+                controller: _passwordController,
+                label: 'Password',
+                icon: Icons.lock_outline,
+                obscure: true,
+                validator: (v) => v == null || v.length < 6 ? 'Minimal 6 karakter' : null,
+              ),
+
+              const SizedBox(height: 24),
               _buildSectionTitle('Informasi Dasar'),
               const SizedBox(height: 12),
 
@@ -212,8 +273,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
                 controller: _namaController,
                 label: 'Nama Lengkap',
                 icon: Icons.person_outline,
-                validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Nama wajib diisi' : null,
+                validator: (v) => v == null || v.trim().isEmpty ? 'Nama wajib diisi' : null,
               ),
               const SizedBox(height: 12),
 
@@ -241,8 +301,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
                     child: InkWell(
                       onTap: _pickDate,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
@@ -250,8 +309,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.cake_outlined,
-                                size: 20, color: AppColors.primary),
+                            const Icon(Icons.cake_outlined, size: 20, color: AppColors.primary),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -260,9 +318,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
                                     : 'Tgl Lahir',
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: _tanggalLahir != null
-                                      ? AppColors.textPrimary
-                                      : AppColors.textHint,
+                                  color: _tanggalLahir != null ? AppColors.textPrimary : AppColors.textHint,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -296,20 +352,15 @@ class _EditStaffPageState extends State<EditStaffPage> {
 
               const SizedBox(height: 32),
 
-              // Simpan Button
               ElevatedButton.icon(
                 onPressed: _onSave,
                 icon: const Icon(Icons.save_outlined),
-                label: const Text(
-                  'Simpan Perubahan',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
+                label: const Text('Simpan Petugas Baru', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
               ),
             ],
@@ -320,10 +371,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary),
-    );
+    return Text(title, style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary));
   }
 
   Widget _buildTextField({
@@ -334,11 +382,13 @@ class _EditStaffPageState extends State<EditStaffPage> {
     String? Function(String?)? validator,
     TextInputType keyboard = TextInputType.text,
     int maxLines = 1,
+    bool obscure = false,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboard,
       maxLines: maxLines,
+      obscureText: obscure,
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
@@ -358,8 +408,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

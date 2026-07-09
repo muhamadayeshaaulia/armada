@@ -18,6 +18,7 @@ import 'features/staff/domain/usecases/get_admins_usecase.dart';
 import 'features/staff/domain/usecases/get_doctors_usecase.dart';
 import 'features/staff/domain/usecases/update_staff_usecase.dart';
 import 'features/staff/domain/usecases/delete_staff_usecase.dart';
+import 'features/staff/domain/usecases/add_staff_usecase.dart';
 import 'features/staff/presentation/bloc/staff_bloc.dart';
 
 final sl = GetIt.instance;
@@ -68,6 +69,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetDoctorsUseCase(sl()));
   sl.registerLazySingleton(() => UpdateStaffUseCase(sl()));
   sl.registerLazySingleton(() => DeleteStaffUseCase(sl()));
+  sl.registerLazySingleton(() => AddStaffUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<StaffRepository>(

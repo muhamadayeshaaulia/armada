@@ -7,6 +7,7 @@ import '../bloc/staff_bloc.dart';
 import '../bloc/staff_event.dart';
 import '../bloc/staff_state.dart';
 import 'edit_staff_page.dart';
+import 'add_staff_page.dart';
 
 class StaffPage extends StatefulWidget {
   const StaffPage({super.key});
@@ -15,21 +16,13 @@ class StaffPage extends StatefulWidget {
   State<StaffPage> createState() => _StaffPageState();
 }
 
-class _StaffPageState extends State<StaffPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _StaffPageState extends State<StaffPage> {
+  String _selectedRole = 'admin';
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     context.read<StaffBloc>().add(LoadStaffEvent());
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   void _showDeleteDialog(StaffEntity staff) {
@@ -106,27 +99,115 @@ class _StaffPageState extends State<StaffPage>
                   Text('Kelola admin & dokter praktik',
                       style: AppTextStyles.headerSubtitle),
                   const SizedBox(height: 20),
-                  // Tab Bar
+                  // Toggle Slider Role
                   Container(
-                    height: 40,
+                    height: 50,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: TabBar(
-                      controller: _tabController,
-                      indicator: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      labelColor: AppColors.primary,
-                      unselectedLabelColor: Colors.white,
-                      labelStyle: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 13),
-                      dividerColor: Colors.transparent,
-                      tabs: const [
-                        Tab(text: 'Admin'),
-                        Tab(text: 'Dokter'),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Background slider animasi
+                        AnimatedAlign(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOutCubic,
+                          alignment: _selectedRole == 'dokter'
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: FractionallySizedBox(
+                            widthFactor: 0.5,
+                            child: Container(
+                              margin: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Lapisan tombol
+                        SizedBox.expand(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Tombol Admin
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _selectedRole = 'admin'),
+                                  behavior: HitTestBehavior.opaque,
+                                  child: TweenAnimationBuilder<Color?>(
+                                    tween: ColorTween(
+                                      begin: _selectedRole == 'admin' ? Colors.white : AppColors.primary,
+                                      end: _selectedRole == 'admin' ? AppColors.primary : Colors.white,
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    builder: (context, color, _) {
+                                      return Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.admin_panel_settings_rounded, color: color, size: 18),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Admin',
+                                            style: TextStyle(
+                                              color: color,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+
+                              // Tombol Dokter
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _selectedRole = 'dokter'),
+                                  behavior: HitTestBehavior.opaque,
+                                  child: TweenAnimationBuilder<Color?>(
+                                    tween: ColorTween(
+                                      begin: _selectedRole == 'dokter' ? Colors.white : AppColors.primary,
+                                      end: _selectedRole == 'dokter' ? AppColors.primary : Colors.white,
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    builder: (context, color, _) {
+                                      return Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.medical_services_rounded, color: color, size: 18),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Dokter',
+                                            style: TextStyle(
+                                              color: color,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -193,12 +274,26 @@ class _StaffPageState extends State<StaffPage>
                   }
 
                   if (state is StaffLoaded) {
-                    return TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildStaffList(state.admins, 'admin'),
-                        _buildStaffList(state.doctors, 'dokter'),
-                      ],
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeInOutCubic,
+                      switchOutCurve: Curves.easeInOutCubic,
+                      transitionBuilder: (child, animation) {
+                        final slideAnimation = Tween<Offset>(
+                          begin: Offset(_selectedRole == 'admin' ? -0.2 : 0.2, 0),
+                          end: Offset.zero,
+                        ).animate(animation);
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: slideAnimation,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: _selectedRole == 'admin'
+                          ? _buildStaffList(state.admins, 'admin', key: const ValueKey('admin'))
+                          : _buildStaffList(state.doctors, 'dokter', key: const ValueKey('dokter')),
                     );
                   }
 
@@ -211,12 +306,30 @@ class _StaffPageState extends State<StaffPage>
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: context.read<StaffBloc>(),
+                child: const AddStaffPage(),
+              ),
+            ),
+          );
+        },
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Tambah Petugas', style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
     );
   }
 
-  Widget _buildStaffList(List<StaffEntity> staffList, String role) {
+  Widget _buildStaffList(List<StaffEntity> staffList, String role, {Key? key}) {
     if (staffList.isEmpty) {
       return Center(
+        key: key,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -240,6 +353,7 @@ class _StaffPageState extends State<StaffPage>
     }
 
     return RefreshIndicator(
+      key: key,
       onRefresh: () async =>
           context.read<StaffBloc>().add(LoadStaffEvent()),
       color: AppColors.primary,

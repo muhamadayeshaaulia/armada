@@ -7,4 +7,5 @@ abstract class StaffRepository {
   Future<Either<Failure, List<StaffEntity>>> getDoctors();
   Future<Either<Failure, void>> updateStaff(StaffEntity staff);
   Future<Either<Failure, void>> deleteStaff(String id, String role);
+  Future<Either<Failure, void>> addStaff(StaffEntity staff, String email, String password);
 }

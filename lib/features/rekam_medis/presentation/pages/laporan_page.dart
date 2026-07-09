@@ -58,7 +58,7 @@ class _LaporanPageState extends State<LaporanPage> {
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('LAPORAN REKAM MEDIS - ARMADA', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+                  pw.Text('LAPORAN REKAM MEDIS - KLINIK KASIH IBU', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
                   pw.Text(DateTime.now().toString().substring(0, 10)),
                 ],
               ),
@@ -122,7 +122,7 @@ class _LaporanPageState extends State<LaporanPage> {
                   child: pw.Text('SURAT KETERANGAN REKAM MEDIS', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
                 ),
                 pw.Center(
-                  child: pw.Text('ARMADA', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+                  child: pw.Text('KLINIK KASIH IBU', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
                 ),
                 pw.SizedBox(height: 10),
                 pw.Divider(),

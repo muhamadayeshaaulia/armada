@@ -28,6 +28,9 @@ class _LaporanPageState extends State<LaporanPage> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
+  final _statusSearchController = TextEditingController();
+  String _statusSearchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +41,7 @@ class _LaporanPageState extends State<LaporanPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _statusSearchController.dispose();
     super.dispose();
   }
 
@@ -242,7 +246,8 @@ class _LaporanPageState extends State<LaporanPage> {
               context,
               MaterialPageRoute(builder: (_) => const AddRekamMedisPage()),
             ).then((_) {
-              context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+              if (!mounted) return;
+              this.context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
             });
           },
           child: const Icon(Icons.add, size: 28),
@@ -457,7 +462,8 @@ class _LaporanPageState extends State<LaporanPage> {
                                                   ),
                                                 ),
                                               ).then((_) {
-                                                context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+                                                if (!mounted) return;
+                                                this.context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
                                               });
                                             },
                                             icon: const Icon(Icons.edit_rounded, size: 16),
@@ -508,38 +514,92 @@ class _LaporanPageState extends State<LaporanPage> {
   }
 
   Widget _buildStatusPasienTab() {
-    return BlocBuilder<PatientBloc, PatientState>(
-      builder: (context, patientState) {
-        return BlocBuilder<RekamMedisBloc, RekamMedisState>(
-          builder: (context, rmState) {
-            if (patientState is PatientLoading || rmState is RekamMedisLoading) {
-              return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-            }
+    return Column(
+      children: [
+        // Search Bar for Status Pasien
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: TextField(
+            controller: _statusSearchController,
+            onChanged: (val) => setState(() => _statusSearchQuery = val.toLowerCase()),
+            decoration: InputDecoration(
+              hintText: 'Cari nama pasien atau NIK...',
+              prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
+              suffixIcon: _statusSearchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear_rounded, color: AppColors.textSecondary),
+                      onPressed: () => setState(() {
+                        _statusSearchController.clear();
+                        _statusSearchQuery = '';
+                      }),
+                    )
+                  : null,
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: AppColors.borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: AppColors.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              ),
+            ),
+          ),
+        ),
+        
+        Expanded(
+          child: BlocBuilder<PatientBloc, PatientState>(
+            builder: (context, patientState) {
+              return BlocBuilder<RekamMedisBloc, RekamMedisState>(
+                builder: (context, rmState) {
+                  if (patientState is PatientLoading || rmState is RekamMedisLoading) {
+                    return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                  }
 
-            if (patientState is PatientLoaded && rmState is RekamMedisLoaded) {
-              final allPatients = patientState.patients;
-              final allRecords = rmState.records;
+                  if (patientState is PatientLoaded && rmState is RekamMedisLoaded) {
+                    final allPatients = patientState.patients;
+                    final allRecords = rmState.records;
 
-              final patientIdsWithRecords = allRecords.map((e) => e.pasienId).toSet();
+                    final patientIdsWithRecords = allRecords.map((e) => e.pasienId).toSet();
 
-              final sudahPeriksa = allPatients.where((p) => patientIdsWithRecords.contains(p.id)).toList();
-              final belumPeriksa = allPatients.where((p) => !patientIdsWithRecords.contains(p.id)).toList();
+                    var sudahPeriksa = allPatients.where((p) => patientIdsWithRecords.contains(p.id)).toList();
+                    var belumPeriksa = allPatients.where((p) => !patientIdsWithRecords.contains(p.id)).toList();
+                    
+                    if (_statusSearchQuery.isNotEmpty) {
+                      sudahPeriksa = sudahPeriksa.where((p) => 
+                        p.namaLengkap.toLowerCase().contains(_statusSearchQuery) || 
+                        (p.nik?.contains(_statusSearchQuery) ?? false)
+                      ).toList();
+                      
+                      belumPeriksa = belumPeriksa.where((p) => 
+                        p.namaLengkap.toLowerCase().contains(_statusSearchQuery) || 
+                        (p.nik?.contains(_statusSearchQuery) ?? false)
+                      ).toList();
+                    }
 
-              return ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  _buildStatusSection('Sudah Melakukan Rekam Medis', sudahPeriksa, true),
-                  const SizedBox(height: 24),
-                  _buildStatusSection('Belum Melakukan Rekam Medis', belumPeriksa, false),
-                  const SizedBox(height: 80),
-                ],
+                    return ListView(
+                      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                      children: [
+                        _buildStatusSection('Sudah Melakukan Rekam Medis', sudahPeriksa, true),
+                        const SizedBox(height: 24),
+                        _buildStatusSection('Belum Melakukan Rekam Medis', belumPeriksa, false),
+                        const SizedBox(height: 80),
+                      ],
+                    );
+                  }
+
+                  return const Center(child: Text('Gagal memuat data.'));
+                },
               );
-            }
-
-            return const Center(child: Text('Gagal memuat data.'));
-          },
-        );
-      },
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -597,10 +657,7 @@ class _LaporanPageState extends State<LaporanPage> {
               separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.borderColor),
               itemBuilder: (context, index) {
                 final p = patients[index];
-                return ListTile(
-                  title: Text(p.namaLengkap, style: AppTextStyles.labelBold.copyWith(fontSize: 13)),
-                  subtitle: Text('NIK: ${p.nik}', style: AppTextStyles.bodySmall.copyWith(fontSize: 11)),
-                  trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textHint, size: 20),
+                return InkWell(
                   onTap: () {
                     final isLaporanMode = widget.title.toLowerCase().contains('laporan');
                     Navigator.push(
@@ -612,9 +669,32 @@ class _LaporanPageState extends State<LaporanPage> {
                         ),
                       ),
                     ).then((_) {
-                      context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+                      if (!mounted) return;
+                      this.context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
                     });
                   },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Transform.translate(
+                            offset: const Offset(0, -3), // Menggeser teks ke atas sedikit
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(p.namaLengkap, style: AppTextStyles.labelBold.copyWith(fontSize: 13, height: 1.0)),
+                                const SizedBox(height: 2),
+                                Text('NIK: ${p.nik}', style: AppTextStyles.bodySmall.copyWith(fontSize: 11, height: 1.0)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right_rounded, color: AppColors.textHint, size: 20),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),

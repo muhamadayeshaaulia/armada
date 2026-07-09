@@ -6,10 +6,16 @@ import '../../../../../core/constants/app_text_styles.dart';
 import '../../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../../features/auth/presentation/bloc/auth_event.dart';
 import '../../../../../features/auth/presentation/bloc/auth_state.dart';
+import 'account_settings_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   Future<Map<String, dynamic>?> _fetchUserDetails(String uid, String role) async {
     final table = role == 'admin' ? 'admins' : 'dokters';
     try {
@@ -73,10 +79,6 @@ class ProfilePage extends StatelessWidget {
                     // Header Profil
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 32,
-                      ),
                       decoration: const BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.only(
@@ -84,42 +86,77 @@ class ProfilePage extends StatelessWidget {
                           bottomRight: Radius.circular(32),
                         ),
                       ),
-                      child: Column(
+                      child: Stack(
                         children: [
-                          // Avatar
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: AppColors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: CircleAvatar(
-                              radius: 44,
-                              backgroundColor: Colors.grey.shade200,
-                              child: Text(
-                                name[0].toUpperCase(),
-                                style: AppTextStyles.heading1.copyWith(
-                                  fontSize: 36,
-                                  color: AppColors.primary,
-                                ),
-                              ),
+                          // Settings Button
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: IconButton(
+                              icon: const Icon(Icons.settings_outlined, color: Colors.white, size: 24),
+                              onPressed: () async {
+                                final updated = await Navigator.push<bool>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AccountSettingsPage(
+                                      uid: uid,
+                                      role: role,
+                                      initialData: data ?? {},
+                                    ),
+                                  ),
+                                );
+                                if (updated == true) {
+                                  setState(() {}); // Pemicu reload data profil
+                                }
+                              },
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Text(name, style: AppTextStyles.headerTitle),
-                          const SizedBox(height: 6),
-                          Container(
+                          Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
+                              horizontal: 24,
+                              vertical: 32,
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColors.overlayLight,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              role.toUpperCase(),
-                              style: AppTextStyles.labelSmall,
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  // Avatar
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 44,
+                                      backgroundColor: Colors.grey.shade200,
+                                      child: Text(
+                                        name[0].toUpperCase(),
+                                        style: AppTextStyles.heading1.copyWith(
+                                          fontSize: 36,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(name, style: AppTextStyles.headerTitle),
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.overlayLight,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      role.toUpperCase(),
+                                      style: AppTextStyles.labelSmall,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],

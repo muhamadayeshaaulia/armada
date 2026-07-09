@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String? _authErrorMessage;
 
   @override
   void dispose() {
@@ -28,7 +29,28 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  String? get _emailErrorText {
+    if (_authErrorMessage == null) return null;
+    final err = _authErrorMessage!.toLowerCase();
+    if (err.contains('email') || err.contains('kredensial') || err.contains('credential') || err.contains('tidak valid')) {
+      return _authErrorMessage;
+    }
+    return null;
+  }
+
+  String? get _passwordErrorText {
+    if (_authErrorMessage == null) return null;
+    final err = _authErrorMessage!.toLowerCase();
+    if (err.contains('password') || err.contains('kredensial') || err.contains('credential') || err.contains('tidak valid')) {
+      return _authErrorMessage;
+    }
+    return null;
+  }
+
   void _onLoginPressed() {
+    setState(() {
+      _authErrorMessage = null;
+    });
     if (_formKey.currentState!.validate()) {
       // Mengirim event login ke BLoC
       context.read<AuthBloc>().add(
@@ -66,6 +88,10 @@ class _LoginPageState extends State<LoginPage> {
                       (route) => false,
                     );
                   }
+                } else if (state is AuthError) {
+                  setState(() {
+                    _authErrorMessage = state.message;
+                  });
                 }
               },
               builder: (context, state) {
@@ -104,9 +130,17 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        onChanged: (_) {
+                          if (_authErrorMessage != null) {
+                            setState(() {
+                              _authErrorMessage = null;
+                            });
+                          }
+                        },
                         decoration: InputDecoration(
                           labelText: 'Email',
                           prefixIcon: const Icon(Icons.email),
+                          errorText: _emailErrorText,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -124,9 +158,17 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
+                        onChanged: (_) {
+                          if (_authErrorMessage != null) {
+                            setState(() {
+                              _authErrorMessage = null;
+                            });
+                          }
+                        },
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: const Icon(Icons.lock),
+                          errorText: _passwordErrorText,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

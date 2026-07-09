@@ -7,6 +7,10 @@ import '../../../rekam_medis/presentation/bloc/rekam_medis_bloc.dart';
 import '../../../rekam_medis/presentation/bloc/rekam_medis_event.dart';
 import '../../../rekam_medis/presentation/bloc/rekam_medis_state.dart';
 import '../../../rekam_medis/presentation/pages/add_rekam_medis_page.dart';
+import '../../../rekam_medis/domain/entities/rekam_medis_entity.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class PatientDetailPage extends StatefulWidget {
   final PatientEntity patient;
@@ -23,6 +27,85 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
     super.initState();
     // Load rekam medis history for this patient
     context.read<RekamMedisBloc>().add(LoadRekamMedisForPatientEvent(widget.patient.id));
+  }
+
+  Future<void> _printSingleRecord(RekamMedisEntity r) async {
+    final pdf = pw.Document();
+
+    final dateStr = r.createdAt != null
+        ? '${r.createdAt!.day}/${r.createdAt!.month}/${r.createdAt!.year}'
+        : '-';
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(30),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Center(
+                  child: pw.Text('SURAT KETERANGAN REKAM MEDIS', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+                ),
+                pw.Center(
+                  child: pw.Text('KLINIK PRATAMA ARMADA', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+                ),
+                pw.SizedBox(height: 10),
+                pw.Divider(),
+                pw.SizedBox(height: 20),
+                _buildPdfRow('Nama Pasien', r.namaPasien ?? '-'),
+                _buildPdfRow('Tanggal Periksa', dateStr),
+                _buildPdfRow('Dokter Pemeriksa', 'Dr. ${r.namaDokter ?? 'Umum'}'),
+                pw.SizedBox(height: 15),
+                pw.Divider(),
+                pw.SizedBox(height: 15),
+                _buildPdfRow('Keluhan Utama', r.keluhan),
+                _buildPdfRow('Hasil Pemeriksaan', r.hasilPemeriksaan),
+                _buildPdfRow('Diagnosis', r.diagnosis),
+                pw.SizedBox(height: 20),
+                if (r.resepList != null && r.resepList!.isNotEmpty) ...[
+                  pw.Text('Resep Obat:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13)),
+                  pw.SizedBox(height: 8),
+                  ...r.resepList!.map((resep) => pw.Bullet(
+                        text: '${resep.obat?.namaObat ?? 'Obat'} - Aturan: ${resep.aturanMinum} (Jml: ${resep.jumlahDiberikan} ${resep.obat?.satuan ?? ''})',
+                        style: const pw.TextStyle(fontSize: 11),
+                      )),
+                ],
+                pw.Spacer(),
+                pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Column(
+                    children: [
+                      pw.Text('Pemeriksa,', style: const pw.TextStyle(fontSize: 12)),
+                      pw.SizedBox(height: 60),
+                      pw.Text('Dr. ${r.namaDokter ?? 'Umum'}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
+  pw.Widget _buildPdfRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(width: 140, child: pw.Text('$label  :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(child: pw.Text(value)),
+        ],
+      ),
+    );
   }
 
   int _calculateAge(DateTime birthDate) {
@@ -122,7 +205,9 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                       MaterialPageRoute(
                         builder: (_) => AddRekamMedisPage(patient: p),
                       ),
-                    );
+                    ).then((_) {
+                      context.read<RekamMedisBloc>().add(LoadRekamMedisForPatientEvent(p.id));
+                    });
                   },
                   icon: const Icon(Icons.add, size: 16),
                   label: const Text('Rekam Medis', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
@@ -259,7 +344,53 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                                               ],
                                             ),
                                           )),
-                                    ]
+                                    ],
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => AddRekamMedisPage(
+                                                    patient: widget.patient,
+                                                    record: r,
+                                                  ),
+                                                ),
+                                              ).then((_) {
+                                                context.read<RekamMedisBloc>().add(LoadRekamMedisForPatientEvent(widget.patient.id));
+                                              });
+                                            },
+                                            icon: const Icon(Icons.edit_rounded, size: 16),
+                                            label: const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primary.withOpacity(0.1),
+                                              foregroundColor: AppColors.primary,
+                                              minimumSize: const Size(0, 40),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              elevation: 0,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: ElevatedButton.icon(
+                                            onPressed: () => _printSingleRecord(r),
+                                            icon: const Icon(Icons.print_rounded, size: 16),
+                                            label: const Text('Cetak', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primary,
+                                              foregroundColor: Colors.white,
+                                              minimumSize: const Size(0, 40),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              elevation: 0,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               )

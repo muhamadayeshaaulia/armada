@@ -32,7 +32,18 @@ class RekamMedisBloc extends Bloc<RekamMedisEvent, RekamMedisState> {
         (failure) => emit(RekamMedisError(failure.message)),
         (_) {
           emit(const RekamMedisActionSuccess('Rekam medis berhasil disimpan.'));
-          // Reload according to the record context
+          add(LoadRekamMedisForPatientEvent(event.record.pasienId));
+        },
+      );
+    });
+
+    on<UpdateRekamMedisEvent>((event, emit) async {
+      emit(RekamMedisLoading());
+      final result = await repository.updateRekamMedis(event.record, event.resepList);
+      result.fold(
+        (failure) => emit(RekamMedisError(failure.message)),
+        (_) {
+          emit(const RekamMedisActionSuccess('Rekam medis berhasil diperbarui.'));
           add(LoadRekamMedisForPatientEvent(event.record.pasienId));
         },
       );

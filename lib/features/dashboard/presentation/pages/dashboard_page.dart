@@ -58,13 +58,13 @@ class DashboardPage extends StatelessWidget {
       onReport: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LaporanPage()),
+          MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Laporan Rekam Medis')),
         );
       },
       onRekamMedis: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const LaporanPage()),
+          MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Rekam Medis')),
         );
       },
       onResepObat: () {

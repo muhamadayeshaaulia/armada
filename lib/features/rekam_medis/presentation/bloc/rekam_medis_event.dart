@@ -27,3 +27,13 @@ class AddRekamMedisEvent extends RekamMedisEvent {
   @override
   List<Object?> get props => [record, resepList];
 }
+
+class UpdateRekamMedisEvent extends RekamMedisEvent {
+  final RekamMedisEntity record;
+  final List<ResepObatEntity> resepList;
+
+  const UpdateRekamMedisEvent(this.record, this.resepList);
+
+  @override
+  List<Object?> get props => [record, resepList];
+}

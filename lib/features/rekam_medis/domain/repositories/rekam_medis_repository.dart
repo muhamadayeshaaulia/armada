@@ -6,4 +6,5 @@ abstract class RekamMedisRepository {
   Future<Either<Failure, List<RekamMedisEntity>>> getRekamMedis();
   Future<Either<Failure, List<RekamMedisEntity>>> getRekamMedisForPatient(String patientId);
   Future<Either<Failure, void>> addRekamMedis(RekamMedisEntity record, List<ResepObatEntity> resepList);
+  Future<Either<Failure, void>> updateRekamMedis(RekamMedisEntity record, List<ResepObatEntity> resepList);
 }

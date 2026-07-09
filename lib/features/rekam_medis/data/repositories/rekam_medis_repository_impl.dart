@@ -57,4 +57,32 @@ class RekamMedisRepositoryImpl implements RekamMedisRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateRekamMedis(RekamMedisEntity record, List<ResepObatEntity> resepList) async {
+    try {
+      final recordModel = RekamMedisModel(
+        id: record.id,
+        pasienId: record.pasienId,
+        dokterId: record.dokterId,
+        keluhan: record.keluhan,
+        hasilPemeriksaan: record.hasilPemeriksaan,
+        diagnosis: record.diagnosis,
+        createdAt: record.createdAt,
+      );
+
+      final resepModels = resepList.map((resep) => ResepObatModel(
+        id: resep.id,
+        rekamMedisId: resep.rekamMedisId,
+        obatId: resep.obatId,
+        aturanMinum: resep.aturanMinum,
+        jumlahDiberikan: resep.jumlahDiberikan,
+      )).toList();
+
+      await remoteDataSource.updateRekamMedis(recordModel, resepModels);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

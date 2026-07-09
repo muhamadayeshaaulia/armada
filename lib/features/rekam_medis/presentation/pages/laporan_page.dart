@@ -6,12 +6,15 @@ import '../bloc/rekam_medis_bloc.dart';
 import '../bloc/rekam_medis_event.dart';
 import '../bloc/rekam_medis_state.dart';
 import '../../domain/entities/rekam_medis_entity.dart';
+import '../../../patient/domain/entities/patient_entity.dart';
+import 'add_rekam_medis_page.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class LaporanPage extends StatefulWidget {
-  const LaporanPage({super.key});
+  final String title;
+  const LaporanPage({super.key, this.title = 'Rekam Medis'});
 
   @override
   State<LaporanPage> createState() => _LaporanPageState();
@@ -176,7 +179,7 @@ class _LaporanPageState extends State<LaporanPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('Laporan Rekam Medis', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
         actions: [
           BlocBuilder<RekamMedisBloc, RekamMedisState>(
@@ -396,17 +399,57 @@ class _LaporanPageState extends State<LaporanPage> {
                                           )),
                                     ],
                                     const SizedBox(height: 16),
-                                    ElevatedButton.icon(
-                                      onPressed: () => _printSingleRecord(r),
-                                      icon: const Icon(Icons.print_rounded, size: 16),
-                                      label: const Text('Cetak Rekam Medis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: Colors.white,
-                                        minimumSize: const Size(double.infinity, 40),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                        elevation: 0,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              final dummyPatient = PatientEntity(
+                                                id: r.pasienId,
+                                                namaLengkap: r.namaPasien ?? 'Pasien',
+                                                tanggalLahir: DateTime.now(),
+                                                jenisKelamin: '',
+                                                nik: '',
+                                              );
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => AddRekamMedisPage(
+                                                    patient: dummyPatient,
+                                                    record: r,
+                                                  ),
+                                                ),
+                                              ).then((_) {
+                                                context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+                                              });
+                                            },
+                                            icon: const Icon(Icons.edit_rounded, size: 16),
+                                            label: const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primary.withOpacity(0.1),
+                                              foregroundColor: AppColors.primary,
+                                              minimumSize: const Size(0, 40),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              elevation: 0,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: ElevatedButton.icon(
+                                            onPressed: () => _printSingleRecord(r),
+                                            icon: const Icon(Icons.print_rounded, size: 16),
+                                            label: const Text('Cetak', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primary,
+                                              foregroundColor: Colors.white,
+                                              minimumSize: const Size(0, 40),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              elevation: 0,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -424,6 +467,20 @@ class _LaporanPageState extends State<LaporanPage> {
             ),
           )
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddRekamMedisPage()),
+          ).then((_) {
+            context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+          });
+        },
+        child: const Icon(Icons.add, size: 28),
       ),
     );
   }

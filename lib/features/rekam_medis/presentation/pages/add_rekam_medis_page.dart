@@ -10,15 +10,37 @@ import '../../../medicine/domain/entities/medicine_entity.dart';
 import '../../../medicine/presentation/bloc/medicine_bloc.dart';
 import '../../../medicine/presentation/bloc/medicine_event.dart';
 import '../../../medicine/presentation/bloc/medicine_state.dart';
+import '../../../patient/domain/entities/patient_entity.dart';
+import '../../../patient/presentation/bloc/patient_bloc.dart';
+import '../../../patient/presentation/bloc/patient_event.dart';
+import '../../../patient/presentation/bloc/patient_state.dart';
 import '../../domain/entities/rekam_medis_entity.dart';
 import '../bloc/rekam_medis_bloc.dart';
 import '../bloc/rekam_medis_event.dart';
-import '../../../patient/domain/entities/patient_entity.dart';
+
+class PrescriptionInput {
+  MedicineEntity? selectedObat;
+  final TextEditingController aturanController;
+  final TextEditingController jumlahController;
+
+  PrescriptionInput({
+    this.selectedObat,
+    String aturan = '3 x 1 Sehari',
+    String jumlah = '10',
+  })  : aturanController = TextEditingController(text: aturan),
+        jumlahController = TextEditingController(text: jumlah);
+
+  void dispose() {
+    aturanController.dispose();
+    jumlahController.dispose();
+  }
+}
 
 class AddRekamMedisPage extends StatefulWidget {
-  final PatientEntity patient;
+  final PatientEntity? patient;
+  final RekamMedisEntity? record;
 
-  const AddRekamMedisPage({super.key, required this.patient});
+  const AddRekamMedisPage({super.key, this.patient, this.record});
 
   @override
   State<AddRekamMedisPage> createState() => _AddRekamMedisPageState();
@@ -30,261 +52,167 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
   final _pemeriksaanController = TextEditingController();
   final _diagnosisController = TextEditingController();
   
-  final List<ResepObatEntity> _prescriptions = [];
+  final List<PrescriptionInput> _prescriptionInputs = [];
+  PatientEntity? _selectedPatient;
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Load patients if we don't have a preselected patient
+    if (widget.patient == null) {
+      context.read<PatientBloc>().add(LoadPatientsEvent());
+    } else {
+      _selectedPatient = widget.patient;
+    }
+
+    // Prefill data if in Edit Mode
+    if (widget.record != null) {
+      _keluhanController.text = widget.record!.keluhan;
+      _pemeriksaanController.text = widget.record!.hasilPemeriksaan;
+      _diagnosisController.text = widget.record!.diagnosis;
+      
+      // Prefill prescriptions
+      if (widget.record!.resepList != null) {
+        for (var resep in widget.record!.resepList!) {
+          _prescriptionInputs.add(
+            PrescriptionInput(
+              selectedObat: resep.obat,
+              aturan: resep.aturanMinum,
+              jumlah: resep.jumlahDiberikan.toString(),
+            ),
+          );
+        }
+      }
+    }
+  }
 
   @override
   void dispose() {
     _keluhanController.dispose();
     _pemeriksaanController.dispose();
     _diagnosisController.dispose();
+    for (var input in _prescriptionInputs) {
+      input.dispose();
+    }
     super.dispose();
   }
 
-  void _addPrescription(MedicineEntity obat, String aturan, int jumlah) {
-    setState(() {
-      _prescriptions.add(
-        ResepObatEntity(
-          id: '',
-          rekamMedisId: '',
-          obatId: obat.id,
-          aturanMinum: aturan,
-          jumlahDiberikan: jumlah,
-          obat: obat,
-        ),
-      );
-    });
-  }
-
-  void _removePrescription(int index) {
-    setState(() {
-      _prescriptions.removeAt(index);
-    });
-  }
-
-  void _showAddObatBottomSheet() {
-    final medState = context.read<MedicineBloc>().state;
-    if (medState is! MedicineLoaded) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Memuat Obat'),
-          content: const Text('Data obat sedang dimuat atau belum tersedia.'),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
-          ],
-        ),
-      );
-      return;
-    }
-
-    final obatList = medState.medicines;
-    if (obatList.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Stok Obat Kosong'),
-          content: const Text('Belum ada data obat di database. Silakan tambahkan obat terlebih dahulu.'),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
-          ],
-        ),
-      );
-      return;
-    }
-
-    MedicineEntity? selectedObat = obatList.first;
-    final aturanController = TextEditingController(text: '3 x 1 Sehari');
-    final jumlahController = TextEditingController(text: '10');
-
-    showModalBottomSheet(
+  void _showErrorDialog(String message) {
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Validasi Gagal'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
       ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-                top: 24,
-                left: 24,
-                right: 24,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Resepkan Obat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textPrimary)),
-                  const SizedBox(height: 16),
-                  // Dropdown obat
-                  const Text('Pilih Obat', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                  const SizedBox(height: 6),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.borderColor),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<MedicineEntity>(
-                        value: selectedObat,
-                        isExpanded: true,
-                        items: obatList.map((o) {
-                          return DropdownMenuItem(
-                            value: o,
-                            child: Text('${o.namaObat} (Stok: ${o.stok} ${o.satuan})'),
-                          );
-                        }).toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            setModalState(() => selectedObat = v);
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Aturan Minum', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                            const SizedBox(height: 6),
-                            TextField(
-                              controller: aturanController,
-                              decoration: InputDecoration(
-                                hintText: 'Misal: 3 x 1 sehari',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Jumlah', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                            const SizedBox(height: 6),
-                            TextField(
-                              controller: jumlahController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  ElevatedButton(
-                    onPressed: () {
-                      final qty = int.tryParse(jumlahController.text) ?? 0;
-                      if (selectedObat != null && qty > 0) {
-                        if (qty > selectedObat!.stok) {
-                          showDialog(
-                            context: ctx,
-                            builder: (c) => AlertDialog(
-                              title: const Text('Stok Kurang'),
-                              content: Text('Stok ${selectedObat!.namaObat} hanya tersisa ${selectedObat!.stok}.'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(c), child: const Text('OK')),
-                              ],
-                            ),
-                          );
-                          return;
-                        }
-                        _addPrescription(selectedObat!, aturanController.text.trim(), qty);
-                        Navigator.pop(ctx);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Tambahkan Resep', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
     );
   }
 
   Future<void> _onSave() async {
+    if (_selectedPatient == null) {
+      _showErrorDialog('Harap pilih pasien terlebih dahulu.');
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
     
     setState(() => _isSaving = true);
 
+    // Validasi input resep secara inline
+    final List<ResepObatEntity> resepList = [];
+    for (var input in _prescriptionInputs) {
+      if (input.selectedObat == null) {
+        _showErrorDialog('Harap pilih obat pada semua resep yang ditambahkan.');
+        setState(() => _isSaving = false);
+        return;
+      }
+      final qty = int.tryParse(input.jumlahController.text.trim()) ?? 0;
+      if (qty <= 0) {
+        _showErrorDialog('Jumlah obat "${input.selectedObat!.namaObat}" harus lebih besar dari 0.');
+        setState(() => _isSaving = false);
+        return;
+      }
+      
+      // Khusus mode tambah: cek apakah stok mencukupi
+      // Pada mode edit, stok di database akan dikembalikan dulu di datasource, tapi kita lakukan cek stok sederhana
+      if (widget.record == null && qty > input.selectedObat!.stok) {
+        _showErrorDialog('Stok obat "${input.selectedObat!.namaObat}" tidak mencukupi (Tersisa: ${input.selectedObat!.stok}).');
+        setState(() => _isSaving = false);
+        return;
+      }
+      
+      resepList.add(
+        ResepObatEntity(
+          id: '',
+          rekamMedisId: widget.record?.id ?? '',
+          obatId: input.selectedObat!.id,
+          aturanMinum: input.aturanController.text.trim(),
+          jumlahDiberikan: qty,
+          obat: input.selectedObat,
+        ),
+      );
+    }
+
     final authState = context.read<AuthBloc>().state;
-    String? currentDokterId;
-    if (authState is AuthAuthenticated) {
-      // Jika login sebagai dokter, set dokter_id. Jika admin, set null atau user id.
+    String? currentDokterId = widget.record?.dokterId;
+    if (widget.record == null && authState is AuthAuthenticated) {
       if (authState.user.role == 'dokter') {
         currentDokterId = authState.user.uid;
       }
     }
 
     final record = RekamMedisEntity(
-      id: '',
-      pasienId: widget.patient.id,
+      id: widget.record?.id ?? '',
+      pasienId: _selectedPatient!.id,
       dokterId: currentDokterId,
       keluhan: _keluhanController.text.trim(),
       hasilPemeriksaan: _pemeriksaanController.text.trim(),
       diagnosis: _diagnosisController.text.trim(),
+      createdAt: widget.record?.createdAt,
     );
 
-    context.read<RekamMedisBloc>().add(AddRekamMedisEvent(record, _prescriptions));
+    if (widget.record != null) {
+      context.read<RekamMedisBloc>().add(UpdateRekamMedisEvent(record, resepList));
+    } else {
+      context.read<RekamMedisBloc>().add(AddRekamMedisEvent(record, resepList));
+    }
 
-    // Pemicu update data obat untuk sinkronisasi stok lokal
+    // Sinkronisasi data obat lokal
     context.read<MedicineBloc>().add(LoadMedicinesEvent());
 
-    // Notifikasi Keamanan/Umum
+    // Kirim Notifikasi lokal (Kategori Umum)
     final notifEnabled = await NotificationPrefs.isUmumNotifEnabled();
     if (notifEnabled) {
       await NotificationService().showNotification(
         id: 40,
-        title: 'Rekam Medis Disimpan',
-        body: 'Rekam medis ${widget.patient.namaLengkap} berhasil disimpan.',
+        title: widget.record != null ? 'Rekam Medis Diperbarui' : 'Rekam Medis Disimpan',
+        body: 'Rekam medis ${_selectedPatient!.namaLengkap} berhasil ${widget.record != null ? "diperbarui" : "disimpan"}.',
       );
     }
 
     if (!mounted) return;
     setState(() => _isSaving = false);
-    Navigator.pop(context); // Kembali ke Detail Pasien
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditMode = widget.record != null;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundPage,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('Tambah Rekam Medis', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(isEditMode ? 'Edit Rekam Medis' : 'Tambah Rekam Medis', style: const TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -294,27 +222,98 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Info Pasien Singkat
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+              // Bagian Pilih Pasien
+              Text('Pilih Pasien', style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
+              const SizedBox(height: 12),
+              
+              if (widget.patient != null || isEditMode)
+                // Jika sudah ada pasien preselected atau sedang mode edit, tampilkan nama pasien terkunci
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person_rounded, color: AppColors.primary, size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _selectedPatient?.namaLengkap ?? 'Nama Pasien',
+                              style: AppTextStyles.labelBold.copyWith(fontSize: 16, color: AppColors.primary),
+                            ),
+                            if (_selectedPatient?.nik != null)
+                              Text('NIK: ${_selectedPatient!.nik}', style: AppTextStyles.bodySmall),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                // Jika masuk dari menu umum, tampilkan Dropdown Pasien
+                BlocBuilder<PatientBloc, PatientState>(
+                  builder: (context, patientState) {
+                    if (patientState is PatientLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (patientState is PatientLoaded) {
+                      final patients = patientState.patients;
+                      
+                      // Inisialisasi _selectedPatient ke item pertama jika belum diset
+                      if (_selectedPatient == null && patients.isNotEmpty) {
+                        _selectedPatient = patients.first;
+                      }
+
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.borderColor),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _selectedPatient?.id,
+                            isExpanded: true,
+                            hint: const Text('Pilih Pasien'),
+                            items: patients.map((p) {
+                              return DropdownMenuItem(
+                                value: p.id,
+                                child: Text('${p.namaLengkap} (NIK: ${p.nik ?? "-"})', style: const TextStyle(fontSize: 14)),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setState(() {
+                                  _selectedPatient = patients.firstWhere((p) => p.id == val);
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text('Gagal memuat daftar pasien', style: TextStyle(color: AppColors.error)),
+                    );
+                  },
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Pasien Pemeriksaan', style: AppTextStyles.bodySmall),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.patient.namaLengkap,
-                      style: AppTextStyles.labelBold.copyWith(fontSize: 16, color: AppColors.primary),
-                    ),
-                  ],
-                ),
-              ),
+              
               const SizedBox(height: 24),
 
               Text('Pemeriksaan Medis', style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
@@ -353,7 +352,20 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
                 children: [
                   Text('Resep Obat', style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
                   ElevatedButton.icon(
-                    onPressed: _showAddObatBottomSheet,
+                    onPressed: () {
+                      final medState = context.read<MedicineBloc>().state;
+                      if (medState is MedicineLoaded && medState.medicines.isNotEmpty) {
+                        setState(() {
+                          _prescriptionInputs.add(
+                            PrescriptionInput(
+                              selectedObat: medState.medicines.first,
+                            ),
+                          );
+                        });
+                      } else {
+                        _showErrorDialog('Data obat sedang dimuat atau belum tersedia.');
+                      }
+                    },
                     icon: const Icon(Icons.add, size: 16),
                     label: const Text('Tambah Obat', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
@@ -367,7 +379,7 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
               ),
               const SizedBox(height: 12),
 
-              if (_prescriptions.isEmpty)
+              if (_prescriptionInputs.isEmpty)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -384,56 +396,128 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
                   ),
                 )
               else
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _prescriptions.length,
-                  itemBuilder: (context, index) {
-                    final p = _prescriptions[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.borderColor),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.08),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.medication_rounded, color: AppColors.primary, size: 20),
+                BlocBuilder<MedicineBloc, MedicineState>(
+                  builder: (context, medState) {
+                    if (medState is! MedicineLoaded) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final obatList = medState.medicines;
+
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _prescriptionInputs.length,
+                      itemBuilder: (context, index) {
+                        final input = _prescriptionInputs[index];
+
+                        // Cocokkan id obat lama dengan referensi obat dari bloc untuk memastikan model obat paling up-to-date
+                        if (input.selectedObat != null) {
+                          try {
+                            input.selectedObat = obatList.firstWhere((o) => o.id == input.selectedObat!.id);
+                          } catch (_) {}
+                        }
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.borderColor),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p.obat?.namaObat ?? 'Nama Obat',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Obat #${index + 1}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+                                    onPressed: () {
+                                      setState(() {
+                                        input.dispose();
+                                        _prescriptionInputs.removeAt(index);
+                                      });
+                                    },
+                                    constraints: const BoxConstraints(),
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // Dropdown
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: AppColors.borderColor),
+                                  color: Colors.grey.shade50,
                                 ),
-                                Text(
-                                  'Dosis: ${p.aturanMinum}',
-                                  style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: input.selectedObat?.id,
+                                    isExpanded: true,
+                                    items: obatList.map((o) {
+                                      return DropdownMenuItem(
+                                        value: o.id,
+                                        child: Text('${o.namaObat} (Stok: ${o.stok} ${o.satuan})', style: const TextStyle(fontSize: 13)),
+                                      );
+                                    }).toList(),
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        setState(() {
+                                          input.selectedObat = obatList.firstWhere((o) => o.id == v);
+                                        });
+                                      }
+                                    },
+                                  ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Aturan Minum & Jumlah
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextFormField(
+                                      controller: input.aturanController,
+                                      validator: (v) => v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
+                                      decoration: InputDecoration(
+                                        labelText: 'Aturan Minum',
+                                        prefixIcon: const Icon(Icons.schedule_rounded, size: 18),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    flex: 1,
+                                    child: TextFormField(
+                                      controller: input.jumlahController,
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) => v == null || v.trim().isEmpty ? 'Wajib' : null,
+                                      decoration: InputDecoration(
+                                        labelText: 'Jumlah',
+                                        prefixIcon: const Icon(Icons.pin_rounded, size: 18),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          Text(
-                            '${p.jumlahDiberikan} ${p.obat?.satuan ?? ''}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded, color: AppColors.error, size: 20),
-                            onPressed: () => _removePrescription(index),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -450,11 +534,13 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
                       )
                     : const Icon(Icons.check_circle_outline_rounded),
                 label: Text(
-                  _isSaving ? 'Menyimpan...' : 'Simpan Rekam Medis',
+                  _isSaving
+                      ? 'Menyimpan...'
+                      : (isEditMode ? 'Perbarui Rekam Medis' : 'Simpan Rekam Medis'),
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
+                  backgroundColor: isEditMode ? AppColors.primary : AppColors.success,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

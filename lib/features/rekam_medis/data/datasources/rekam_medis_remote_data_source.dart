@@ -40,6 +40,7 @@ class RekamMedisRemoteDataSourceImpl implements RekamMedisRemoteDataSource {
 
   @override
   Future<void> addRekamMedis(RekamMedisModel record, List<ResepObatModel> resepList) async {
+    print('DEBUG: addRekamMedis started');
     final data = record.toJson();
     data.remove('id');
 
@@ -51,9 +52,11 @@ class RekamMedisRemoteDataSourceImpl implements RekamMedisRemoteDataSource {
         .single();
     
     final rekamMedisId = recordResponse['id'] as String;
+    print('DEBUG: Inserted rekam_medis ID: $rekamMedisId');
 
     // 2. Insert resep_obat dan update stok obat
     if (resepList.isNotEmpty) {
+      print('DEBUG: Inserting ${resepList.length} prescriptions');
       final resepData = resepList.map((resep) => {
         'rekam_medis_id': rekamMedisId,
         'obat_id': resep.obatId,
@@ -65,25 +68,36 @@ class RekamMedisRemoteDataSourceImpl implements RekamMedisRemoteDataSource {
 
       // Kurangi stok untuk masing-masing obat
       for (var resep in resepList) {
-        final obatRes = await supabaseClient
-            .from('obats')
-            .select('stok')
-            .eq('id', resep.obatId)
-            .single();
-        
-        final currentStok = obatRes['stok'] as int? ?? 0;
-        final newStok = currentStok - resep.jumlahDiberikan;
+        try {
+          final obatRes = await supabaseClient
+              .from('obats')
+              .select('stok')
+              .eq('id', resep.obatId)
+              .single();
 
-        await supabaseClient
-            .from('obats')
-            .update({'stok': newStok >= 0 ? newStok : 0})
-            .eq('id', resep.obatId);
+          final currentStok = int.tryParse(obatRes['stok']?.toString() ?? '0') ?? 0;
+          final newStok = currentStok - resep.jumlahDiberikan;
+          print('DEBUG: Medicine ID ${resep.obatId} - Current stock: $currentStok, Deducting: ${resep.jumlahDiberikan}, New stock: $newStok');
+
+          final updateRes = await supabaseClient
+              .from('obats')
+              .update({'stok': newStok >= 0 ? newStok : 0})
+              .eq('id', resep.obatId)
+              .select();
+          print('DEBUG: Stock update query executed successfully. Result: $updateRes');
+        } catch (e) {
+          print('DEBUG: Error updating stock in addRekamMedis for medicine ${resep.obatId}: $e');
+          rethrow;
+        }
       }
     }
+    print('DEBUG: addRekamMedis completed successfully');
   }
 
   @override
   Future<void> updateRekamMedis(RekamMedisModel record, List<ResepObatModel> resepList) async {
+    print('DEBUG: updateRekamMedis started for record ID: ${record.id}');
+
     // 1. Ambil resep lama untuk dikembalikan stoknya
     final oldResepRes = await supabaseClient
         .from('resep_obat')
@@ -91,41 +105,58 @@ class RekamMedisRemoteDataSourceImpl implements RekamMedisRemoteDataSource {
         .eq('rekam_medis_id', record.id);
 
     final oldReseps = oldResepRes as List<dynamic>;
+    print('DEBUG: Found ${oldReseps.length} old prescriptions to revert');
 
     // 2. Kembalikan stok obat lama
     for (var old in oldReseps) {
-      final oldObatId = old['obat_id'] as String;
-      final oldQty = old['jumlah_diberikan'] as int;
+      final oldObatId = old['obat_id']?.toString();
+      final oldQty = int.tryParse(old['jumlah_diberikan']?.toString() ?? '0') ?? 0;
 
-      final obatRes = await supabaseClient
-          .from('obats')
-          .select('stok')
-          .eq('id', oldObatId)
-          .single();
-      
-      final currentStok = obatRes['stok'] as int? ?? 0;
-      await supabaseClient
-          .from('obats')
-          .update({'stok': currentStok + oldQty})
-          .eq('id', oldObatId);
+      if (oldObatId != null && oldQty > 0) {
+        try {
+          final obatRes = await supabaseClient
+              .from('obats')
+              .select('stok')
+              .eq('id', oldObatId)
+              .single();
+          
+          final currentStok = int.tryParse(obatRes['stok']?.toString() ?? '0') ?? 0;
+          final updateRes = await supabaseClient
+              .from('obats')
+              .update({'stok': currentStok + oldQty})
+              .eq('id', oldObatId)
+              .select();
+          print('DEBUG: Reverted stock result: $updateRes');
+        } catch (e) {
+          print('DEBUG: Error reverting stock for medicine $oldObatId: $e');
+          rethrow;
+        }
+      }
     }
 
     // 3. Hapus resep lama
-    await supabaseClient
+    print('DEBUG: Deleting old prescriptions from resep_obat for rekam_medis_id: ${record.id}');
+    final deleteRes = await supabaseClient
         .from('resep_obat')
         .delete()
-        .eq('rekam_medis_id', record.id);
+        .eq('rekam_medis_id', record.id)
+        .select();
+    print('DEBUG: Deleted prescriptions result: $deleteRes');
 
     // 4. Update rekam_medis
+    print('DEBUG: Updating rekam_medis table');
     final data = record.toJson();
     data.remove('created_at'); // Jangan update created_at
-    await supabaseClient
+    final updateRMRes = await supabaseClient
         .from('rekam_medis')
         .update(data)
-        .eq('id', record.id);
+        .eq('id', record.id)
+        .select();
+    print('DEBUG: Updated rekam_medis result: $updateRMRes');
 
     // 5. Masukkan resep baru dan kurangi stok obat baru
     if (resepList.isNotEmpty) {
+      print('DEBUG: Inserting ${resepList.length} new prescriptions');
       final resepData = resepList.map((resep) => {
         'rekam_medis_id': record.id,
         'obat_id': resep.obatId,
@@ -137,20 +168,28 @@ class RekamMedisRemoteDataSourceImpl implements RekamMedisRemoteDataSource {
 
       // Kurangi stok untuk masing-masing obat baru
       for (var resep in resepList) {
-        final obatRes = await supabaseClient
-            .from('obats')
-            .select('stok')
-            .eq('id', resep.obatId)
-            .single();
-        
-        final currentStok = obatRes['stok'] as int? ?? 0;
-        final newStok = currentStok - resep.jumlahDiberikan;
+        try {
+          final obatRes = await supabaseClient
+              .from('obats')
+              .select('stok')
+              .eq('id', resep.obatId)
+              .single();
+          
+          final currentStok = int.tryParse(obatRes['stok']?.toString() ?? '0') ?? 0;
+          final newStok = currentStok - resep.jumlahDiberikan;
 
-        await supabaseClient
-            .from('obats')
-            .update({'stok': newStok >= 0 ? newStok : 0})
-            .eq('id', resep.obatId);
+          final updateRes = await supabaseClient
+              .from('obats')
+              .update({'stok': newStok >= 0 ? newStok : 0})
+              .eq('id', resep.obatId)
+              .select();
+          print('DEBUG: Deducted stock result: $updateRes');
+        } catch (e) {
+          print('DEBUG: Error deducting stock for medicine ${resep.obatId}: $e');
+          rethrow;
+        }
       }
     }
+    print('DEBUG: updateRekamMedis completed successfully');
   }
 }

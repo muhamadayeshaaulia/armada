@@ -8,12 +8,33 @@ import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/staff/presentation/pages/staff_page.dart';
 import '../../../../features/patient/presentation/pages/patient_page.dart';
 import '../../../../features/medicine/presentation/pages/medicine_page.dart';
+import '../../../../features/medicine/domain/entities/medicine_entity.dart';
+import '../../../../features/medicine/presentation/bloc/medicine_bloc.dart';
+import '../../../../features/medicine/presentation/bloc/medicine_event.dart';
+import '../../../../features/medicine/presentation/bloc/medicine_state.dart';
 import '../../../../features/rekam_medis/presentation/pages/laporan_page.dart';
 import '../../../../features/rekam_medis/presentation/pages/resep_obat_page.dart';
+import '../../../../features/rekam_medis/domain/entities/rekam_medis_entity.dart';
+import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_bloc.dart';
+import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_event.dart';
+import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_state.dart';
 import '../../../../features/profile/presentation/pages/account_settings_page.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Dispatch events to fetch latest data for medicines and rekam medis
+    context.read<MedicineBloc>().add(LoadMedicinesEvent());
+    context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+  }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -47,25 +68,33 @@ class DashboardPage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const PatientPage()),
-        );
+        ).then((_) {
+          context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+        });
       },
       onMedicine: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const MedicinePage()),
-        );
+        ).then((_) {
+          context.read<MedicineBloc>().add(LoadMedicinesEvent());
+        });
       },
       onReport: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Laporan Rekam Medis')),
-        );
+        ).then((_) {
+          context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+        });
       },
       onRekamMedis: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Rekam Medis')),
-        );
+        ).then((_) {
+          context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+        });
       },
       onResepObat: () {
         Navigator.push(
@@ -82,28 +111,27 @@ class DashboardPage extends StatelessWidget {
     );
 
     return Scaffold(
-        backgroundColor: AppColors.backgroundPage,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── HEADER ──────────────────────────────────────────────────────
-              BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) {
-                  String email = 'Memuat...';
-                  String role = 'Memuat...';
-                  String name = 'Pengguna';
+      backgroundColor: AppColors.backgroundPage,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ── HEADER (Sticky at the top!) ──────────────────────────────────
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                String email = 'Memuat...';
+                String roleName = 'Memuat...';
+                String name = 'Pengguna';
 
-                  if (state is AuthAuthenticated) {
-                    email = state.user.email;
-                    role = state.user.role.toUpperCase();
-                    name = _extractNameFromEmail(email);
-                  }
+                if (state is AuthAuthenticated) {
+                  email = state.user.email;
+                  roleName = state.user.role.toUpperCase();
+                  name = _extractNameFromEmail(email);
+                }
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 20,
-                    ),
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 20,
+                  ),
                   decoration: const BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.only(
@@ -131,7 +159,7 @@ class DashboardPage extends StatelessWidget {
                           radius: 32,
                           backgroundColor: Colors.grey.shade200,
                           child: Text(
-                            name[0],
+                            name.isNotEmpty ? name[0] : 'U',
                             style: AppTextStyles.heading1.copyWith(
                               color: AppColors.primary,
                             ),
@@ -165,7 +193,7 @@ class DashboardPage extends StatelessWidget {
                                     color: AppColors.overlayLight,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text(role, style: AppTextStyles.labelSmall),
+                                  child: Text(roleName, style: AppTextStyles.labelSmall),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -183,43 +211,168 @@ class DashboardPage extends StatelessWidget {
                           ],
                         ),
                       ),
-
-                      // Tombol Notifikasi
-                      IconButton(
-                        onPressed: () {
-                          // TODO: Navigasi ke halaman notifikasi
-                        },
-                        icon: const Icon(Icons.notifications_none_rounded, color: AppColors.white),
-                        tooltip: 'Notifikasi',
-                      ),
                     ],
                   ),
                 );
               },
             ),
 
-            // ── MENU UTAMA ──────────────────────────────────────────────────
+            // ── SCROLLABLE CONTENT ──────────────────────────────────────────
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Menu Utama', style: AppTextStyles.heading3),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: GridView.count(
-                        padding: EdgeInsets.zero,
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 0.95,
-                        children: menus
-                            .map((menu) => _buildMenuCard(menu))
-                            .toList(),
-                      ),
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  context.read<MedicineBloc>().add(LoadMedicinesEvent());
+                  context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 100), // Prevent overlap with bottom nav bar
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Menu Utama', style: AppTextStyles.heading3),
+                        const SizedBox(height: 16),
+                        
+                        // GridView Menu Utama
+                        GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.95,
+                          children: menus
+                              .map((menu) => _buildMenuCard(menu))
+                              .toList(),
+                        ),
+                        
+                        const SizedBox(height: 32),
+
+                        // ── SECTION 1: STOK OBAT TERSEDIA ────────────────────────────
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Stok Obat Tersedia', style: AppTextStyles.heading3),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const MedicinePage()),
+                                ).then((_) {
+                                  context.read<MedicineBloc>().add(LoadMedicinesEvent());
+                                });
+                              },
+                              child: const Text(
+                                'Lihat Semua',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        BlocBuilder<MedicineBloc, MedicineState>(
+                          builder: (context, state) {
+                            if (state is MedicineLoading) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            if (state is MedicineLoaded) {
+                              final medicines = state.medicines;
+                              if (medicines.isEmpty) {
+                                return _buildEmptyCard('Belum ada data obat.');
+                              }
+                              return SizedBox(
+                                height: 110,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: medicines.length,
+                                  itemBuilder: (context, index) {
+                                    final medicine = medicines[index];
+                                    return _buildMedicineStockCard(medicine);
+                                  },
+                                ),
+                              );
+                            }
+                            return _buildEmptyCard('Gagal memuat data obat.');
+                          },
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // ── SECTION 2: PASIEN REKAM MEDIS ───────────────────────────
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Pasien Sudah Rekam Medis', style: AppTextStyles.heading3),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Rekam Medis')),
+                                ).then((_) {
+                                  context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+                                });
+                              },
+                              child: const Text(
+                                'Lihat Semua',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        BlocBuilder<RekamMedisBloc, RekamMedisState>(
+                          builder: (context, state) {
+                            if (state is RekamMedisLoading) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            if (state is RekamMedisLoaded) {
+                              final records = state.records;
+                              if (records.isEmpty) {
+                                return _buildEmptyCard('Belum ada pasien rekam medis.');
+                              }
+                              
+                              // Ambil 5 rekam medis terbaru
+                              final recentRecords = records.take(5).toList();
+
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: recentRecords.length,
+                                itemBuilder: (context, index) {
+                                  final record = recentRecords[index];
+                                  return _buildRecentPatientCard(record);
+                                },
+                              );
+                            }
+                            return _buildEmptyCard('Gagal memuat data rekam medis.');
+                          },
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -229,7 +382,186 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  // Widget kartu menu — menerima MenuItemData, bukan parameter satu-satu
+  // Widget Horizontal Medicine Card
+  Widget _buildMedicineStockCard(MedicineEntity medicine) {
+    Color statusColor = Colors.green;
+    String statusText = 'Tersedia';
+
+    if (medicine.stok == 0) {
+      statusColor = Colors.red;
+      statusText = 'Habis';
+    } else if (medicine.stok <= 10) {
+      statusColor = Colors.orange;
+      statusText = 'Menipis';
+    }
+
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.01),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            medicine.namaObat,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: AppColors.textPrimary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${medicine.stok} ${medicine.satuan}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  statusText,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget Recent Patient Record Card
+  Widget _buildRecentPatientCard(RekamMedisEntity record) {
+    final dateStr = record.createdAt != null
+        ? '${record.createdAt!.day}/${record.createdAt!.month}/${record.createdAt!.year}'
+        : '-';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.01),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.08),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  record.namaPasien ?? 'Nama Pasien',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Diagnosis: ${record.diagnosis}',
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Oleh: ${record.namaDokter ?? "Dokter"}',
+                  style: TextStyle(
+                    color: AppColors.textSecondary.withOpacity(0.8),
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            dateStr,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget empty state card
+  Widget _buildEmptyCard(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: Center(
+        child: Text(
+          message,
+          style: const TextStyle(
+            fontStyle: FontStyle.italic,
+            color: AppColors.textSecondary,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget kartu menu
   Widget _buildMenuCard(MenuItemData menu) {
     return InkWell(
       onTap: menu.onTap,

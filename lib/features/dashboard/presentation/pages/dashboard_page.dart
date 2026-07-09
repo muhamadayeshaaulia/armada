@@ -19,7 +19,6 @@ import '../../../../features/rekam_medis/domain/entities/rekam_medis_entity.dart
 import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_bloc.dart';
 import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_event.dart';
 import '../../../../features/rekam_medis/presentation/bloc/rekam_medis_state.dart';
-import '../../../../features/profile/presentation/pages/account_settings_page.dart';
 import '../../../../core/services/notification_service.dart';
 
 class DashboardPage extends StatefulWidget {

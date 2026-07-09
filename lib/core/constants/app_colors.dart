@@ -6,9 +6,9 @@ class AppColors {
   AppColors._(); // Prevent instantiation
 
   // === WARNA UTAMA (Primary) ===
-  static const Color primary = Color(0xFF0F4C81);
-  static const Color primaryLight = Color(0xFF1A6BB5);
-  static const Color primaryDark = Color(0xFF0A3560);
+  static const Color primary = Color(0xFF0EA5E9);
+  static const Color primaryLight = Color(0xFF38BDF8);
+  static const Color primaryDark = Color(0xFF0284C7);
 
   // === GRADIENT PRIMARY ===
   static const LinearGradient primaryGradient = LinearGradient(

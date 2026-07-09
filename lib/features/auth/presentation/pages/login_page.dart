@@ -6,6 +6,7 @@ import '../bloc/auth_state.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/notification_prefs.dart';
+import '../../../../core/constants/app_colors.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -77,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                       const Icon(
                         Icons.local_hospital,
                         size: 80,
-                        color: Color(0xFF0F4C81),
+                        color: AppColors.primary,
                       ),
                       const SizedBox(height: 16),
                       const Text(
@@ -86,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F4C81),
+                          color: AppColors.primary,
                         ),
                       ),
                       const Text(
@@ -143,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                       ElevatedButton(
                         onPressed: state is AuthLoading ? null : _onLoginPressed,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F4C81),
+                          backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -189,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                               'Daftar di sini',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F4C81),
+                                color: AppColors.primary,
                               ),
                             ),
                           ),

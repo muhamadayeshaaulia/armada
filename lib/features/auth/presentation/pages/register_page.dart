@@ -6,6 +6,7 @@ import '../bloc/auth_state.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/notification_prefs.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -79,7 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F4C81),
+                          color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -121,13 +122,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
                         child: Row(
                           children: const [
-                            Icon(Icons.badge, size: 16, color: Color(0xFF0F4C81)),
+                            Icon(Icons.badge, size: 16, color: AppColors.primary),
                             SizedBox(width: 6),
                             Text(
                               'Role Pengguna',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F4C81),
+                                color: AppColors.primary,
                               ),
                             ),
                           ],
@@ -158,12 +159,12 @@ class _RegisterPageState extends State<RegisterPage> {
                                   margin: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFF0F4C81), Color(0xFF1A6BB5)],
+                                      colors: [AppColors.primary, AppColors.primaryLight],
                                     ),
                                     borderRadius: BorderRadius.circular(12),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF0F4C81).withOpacity(0.35),
+                                        color: AppColors.primary.withOpacity(0.35),
                                         blurRadius: 6,
                                         offset: const Offset(0, 3),
                                       ),
@@ -258,7 +259,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ElevatedButton(
                         onPressed: state is AuthLoading ? null : _onRegisterPressed,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F4C81),
+                          backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
@@ -290,7 +291,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               'Masuk di sini',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F4C81),
+                                color: AppColors.primary,
                               ),
                             ),
                           ),

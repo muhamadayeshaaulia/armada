@@ -15,6 +15,7 @@ import 'features/medicine/presentation/bloc/medicine_event.dart';
 import 'features/rekam_medis/presentation/bloc/rekam_medis_bloc.dart';
 import 'features/rekam_medis/presentation/bloc/rekam_medis_event.dart';
 
+import 'core/constants/app_colors.dart';
 import 'core/services/notification_service.dart';
 
 void main() async {
@@ -107,7 +108,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F4C81)),
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         ),
         home: const SplashPage(),
       ),

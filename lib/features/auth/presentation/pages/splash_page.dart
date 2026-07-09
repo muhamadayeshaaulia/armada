@@ -6,6 +6,7 @@ import '../bloc/auth_state.dart';
 import 'onboarding_page.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
 import '../../../../core/services/notification_prefs.dart';
+import '../../../../core/constants/app_colors.dart';
 import 'biometric_auth_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -50,8 +51,8 @@ class _SplashPageState extends State<SplashPage> {
           );
         }
       },
-      child: const Scaffold(
-        backgroundColor: Color(0xFF0F4C81),
+      child: Scaffold(
+        backgroundColor: AppColors.primary,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

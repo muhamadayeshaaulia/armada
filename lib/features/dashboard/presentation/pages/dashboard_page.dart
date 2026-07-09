@@ -129,89 +129,131 @@ class _DashboardPageState extends State<DashboardPage> {
                 }
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 20,
-                  ),
+                  width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: AppColors.primary,
+                    gradient: LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(40),
-                      bottomRight: Radius.circular(40),
+                      bottomLeft: Radius.circular(36),
+                      bottomRight: Radius.circular(36),
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      // Avatar
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          color: AppColors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircleAvatar(
-                          radius: 32,
-                          backgroundColor: Colors.grey.shade200,
-                          child: Text(
-                            name.isNotEmpty ? name[0] : 'U',
-                            style: AppTextStyles.heading1.copyWith(
-                              color: AppColors.primary,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(36),
+                      bottomRight: Radius.circular(36),
+                    ),
+                    child: Stack(
+                      children: [
+                        // Decorative Bubble 1 (Background decoration)
+                        Positioned(
+                          right: -40,
+                          top: -40,
+                          child: Container(
+                            width: 130,
+                            height: 130,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.08),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      // Info User
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_getGreeting(), style: AppTextStyles.headerSubtitle),
-                            const SizedBox(height: 4),
-                            Text(
-                              name,
-                              style: AppTextStyles.headerTitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                        // Decorative Bubble 2
+                        Positioned(
+                          left: -20,
+                          bottom: -40,
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.05),
                             ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                // Badge Role
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.overlayLight,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(roleName, style: AppTextStyles.labelSmall),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    email,
-                                    style: AppTextStyles.headerSubtitle.copyWith(
-                                      fontSize: 12,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                        // Real Content
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                          child: Row(
+                            children: [
+                              // Avatar
+                              Container(
+                                padding: const EdgeInsets.all(3),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: CircleAvatar(
+                                  radius: 32,
+                                  backgroundColor: Colors.grey.shade200,
+                                  child: Text(
+                                    name.isNotEmpty ? name[0] : 'U',
+                                    style: AppTextStyles.heading1.copyWith(
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+
+                              // Info User
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(_getGreeting(), style: AppTextStyles.headerSubtitle),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      name,
+                                      style: AppTextStyles.headerTitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        // Badge Role
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.overlayLight,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(roleName, style: AppTextStyles.labelSmall),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            email,
+                                            style: AppTextStyles.headerSubtitle.copyWith(
+                                              fontSize: 12,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -176,7 +176,6 @@ class _PatientPageState extends State<PatientPage> {
                       itemBuilder: (context, index) {
                         final p = filtered[index];
                         final initial = p.namaLengkap.trim().isNotEmpty ? p.namaLengkap.trim()[0].toUpperCase() : 'P';
-                        
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(

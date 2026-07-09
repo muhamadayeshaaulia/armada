@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import 'login_page.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -89,7 +90,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         Icon(
                           _onboardingData[index]["icon"],
                           size: 120,
-                          color: const Color(0xFF0F4C81),
+                          color: AppColors.primary,
                         ),
                         const SizedBox(height: 48),
                         Text(
@@ -98,7 +99,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F4C81),
+                            color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -135,7 +136,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         width: _currentPage == index ? 24 : 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? const Color(0xFF0F4C81)
+                              ? AppColors.primary
                               : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -147,7 +148,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ElevatedButton(
                     onPressed: _nextPage,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F4C81),
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 12,

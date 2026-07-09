@@ -210,10 +210,10 @@ class DashboardPage extends StatelessWidget {
                     Expanded(
                       child: GridView.count(
                         padding: EdgeInsets.zero,
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        // Tinggal loop dari AppMenus — tidak ada hardcode di sini
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.95,
                         children: menus
                             .map((menu) => _buildMenuCard(menu))
                             .toList(),
@@ -233,35 +233,41 @@ class DashboardPage extends StatelessWidget {
   Widget _buildMenuCard(MenuItemData menu) {
     return InkWell(
       onTap: menu.onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: menu.color.withOpacity(0.12),
-              spreadRadius: 2,
-              blurRadius: 15,
-              offset: const Offset(0, 5),
+              color: menu.color.withOpacity(0.06),
+              spreadRadius: 1,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(color: AppColors.borderColor.withOpacity(0.8)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: menu.color.withOpacity(0.1),
+                color: menu.color.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(menu.icon, size: 36, color: menu.color),
+              child: Icon(menu.icon, size: 24, color: menu.color),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               menu.title,
-              style: AppTextStyles.labelBold,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                height: 1.2,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

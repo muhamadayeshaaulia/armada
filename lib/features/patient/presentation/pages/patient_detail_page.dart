@@ -14,8 +14,9 @@ import 'package:printing/printing.dart';
 
 class PatientDetailPage extends StatefulWidget {
   final PatientEntity patient;
+  final bool isFromLaporan;
 
-  const PatientDetailPage({super.key, required this.patient});
+  const PatientDetailPage({super.key, required this.patient, this.isFromLaporan = false});
 
   @override
   State<PatientDetailPage> createState() => _PatientDetailPageState();
@@ -27,6 +28,58 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
     super.initState();
     // Load rekam medis history for this patient
     context.read<RekamMedisBloc>().add(LoadRekamMedisForPatientEvent(widget.patient.id));
+  }
+
+  Future<void> _printPatientHistory(List<RekamMedisEntity> records) async {
+    final pdf = pw.Document();
+    
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return [
+             pw.Header(
+                level: 0,
+                child: pw.Text('LAPORAN RIWAYAT REKAM MEDIS PASIEN', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+             ),
+             pw.SizedBox(height: 10),
+             _buildPdfRow('Nama Pasien', widget.patient.namaLengkap),
+             _buildPdfRow('NIK', widget.patient.nik ?? '-'),
+             _buildPdfRow('Total Kunjungan', '${records.length} kali'),
+             pw.SizedBox(height: 20),
+             pw.TableHelper.fromTextArray(
+                headers: ['No', 'Tanggal', 'Dokter', 'Diagnosis', 'Keluhan'],
+                data: List<List<dynamic>>.generate(records.length, (index) {
+                   final r = records[index];
+                   final dateStr = r.createdAt != null
+                       ? '${r.createdAt!.day}/${r.createdAt!.month}/${r.createdAt!.year}'
+                       : '-';
+                   return [
+                      (index + 1).toString(),
+                      dateStr,
+                      'Dr. ${r.namaDokter ?? 'Umum'}',
+                      r.diagnosis,
+                      r.keluhan,
+                   ];
+                }),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                cellHeight: 25,
+                cellAlignments: {
+                  0: pw.Alignment.centerLeft,
+                  1: pw.Alignment.centerLeft,
+                  2: pw.Alignment.centerLeft,
+                  3: pw.Alignment.centerLeft,
+                  4: pw.Alignment.centerLeft,
+                },
+             ),
+          ];
+        }
+      )
+    );
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
   }
 
   Future<void> _printSingleRecord(RekamMedisEntity r) async {
@@ -129,6 +182,21 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
         foregroundColor: Colors.white,
         title: const Text('Detail Pasien & Riwayat', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
+        actions: [
+          if (widget.isFromLaporan)
+            BlocBuilder<RekamMedisBloc, RekamMedisState>(
+              builder: (context, state) {
+                if (state is RekamMedisLoaded && state.records.isNotEmpty) {
+                  return IconButton(
+                    icon: const Icon(Icons.print_rounded),
+                    tooltip: 'Cetak Riwayat Pasien',
+                    onPressed: () => _printPatientHistory(state.records),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

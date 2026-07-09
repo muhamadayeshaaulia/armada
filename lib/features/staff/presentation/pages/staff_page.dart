@@ -306,22 +306,21 @@ class _StaffPageState extends State<StaffPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => BlocProvider.value(
                 value: context.read<StaffBloc>(),
-                child: const AddStaffPage(),
+                child: AddStaffPage(initialRole: _selectedRole),
               ),
             ),
           );
         },
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Tambah Petugas', style: TextStyle(fontWeight: FontWeight.bold)),
+        child: const Icon(Icons.add),
       ),
     );
   }

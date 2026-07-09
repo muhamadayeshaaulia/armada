@@ -9,7 +9,9 @@ import '../bloc/staff_bloc.dart';
 import '../bloc/staff_event.dart';
 
 class AddStaffPage extends StatefulWidget {
-  const AddStaffPage({super.key});
+  final String initialRole;
+  
+  const AddStaffPage({super.key, required this.initialRole});
 
   @override
   State<AddStaffPage> createState() => _AddStaffPageState();
@@ -30,8 +32,14 @@ class _AddStaffPageState extends State<AddStaffPage> {
   final _spesialisController = TextEditingController();
   DateTime? _tanggalLahir;
   
-  String _selectedRole = 'dokter';
+  late String _selectedRole;
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = widget.initialRole;
+  }
 
   @override
   void dispose() {
@@ -129,7 +137,10 @@ class _AddStaffPageState extends State<AddStaffPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('Tambah Petugas', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Tambah ${isDokter ? 'Dokter' : 'Admin'}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         elevation: 0,
         actions: [
           Padding(
@@ -159,93 +170,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Role Selector
-              _buildSectionTitle('Pilih Peran'),
               const SizedBox(height: 12),
-              Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderColor),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    AnimatedAlign(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubic,
-                      alignment: _selectedRole == 'dokter'
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: FractionallySizedBox(
-                        widthFactor: 0.5,
-                        child: Container(
-                          margin: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox.expand(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _selectedRole = 'admin'),
-                              behavior: HitTestBehavior.opaque,
-                              child: TweenAnimationBuilder<Color?>(
-                                tween: ColorTween(
-                                  begin: _selectedRole == 'admin' ? AppColors.primary : Colors.white,
-                                  end: _selectedRole == 'admin' ? Colors.white : AppColors.textSecondary,
-                                ),
-                                duration: const Duration(milliseconds: 300),
-                                builder: (context, color, _) {
-                                  return Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.admin_panel_settings, color: color, size: 18),
-                                      const SizedBox(width: 6),
-                                      Text('Admin', style: TextStyle(color: color, fontWeight: FontWeight.bold)),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _selectedRole = 'dokter'),
-                              behavior: HitTestBehavior.opaque,
-                              child: TweenAnimationBuilder<Color?>(
-                                tween: ColorTween(
-                                  begin: _selectedRole == 'dokter' ? AppColors.primary : Colors.white,
-                                  end: _selectedRole == 'dokter' ? Colors.white : AppColors.textSecondary,
-                                ),
-                                duration: const Duration(milliseconds: 300),
-                                builder: (context, color, _) {
-                                  return Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.medical_services, color: color, size: 18),
-                                      const SizedBox(width: 6),
-                                      Text('Dokter', style: TextStyle(color: color, fontWeight: FontWeight.bold)),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
               _buildSectionTitle('Informasi Akun (Login)'),
               const SizedBox(height: 12),
               

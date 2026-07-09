@@ -31,18 +31,20 @@ class AppMenus {
     VoidCallback? onStaff,
   }) {
     return [
-      MenuItemData(
-        icon: Icons.badge_rounded,
-        title: 'Data Petugas',
-        color: const Color(0xFF9C27B0),
-        onTap: onStaff,
-      ),
-      MenuItemData(
-        icon: Icons.people_alt_rounded,
-        title: 'Data Pasien',
-        color: AppColors.menuPatient,
-        onTap: onPatient,
-      ),
+      if (role.toLowerCase() != 'dokter') ...[
+        MenuItemData(
+          icon: Icons.badge_rounded,
+          title: 'Data Petugas',
+          color: const Color(0xFF9C27B0),
+          onTap: onStaff,
+        ),
+        MenuItemData(
+          icon: Icons.people_alt_rounded,
+          title: 'Data Pasien',
+          color: AppColors.menuPatient,
+          onTap: onPatient,
+        ),
+      ],
       MenuItemData(
         icon: Icons.medication_rounded,
         title: 'Data Obat',

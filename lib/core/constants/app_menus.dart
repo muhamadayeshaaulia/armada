@@ -27,7 +27,6 @@ class AppMenus {
     VoidCallback? onReport,
     VoidCallback? onRekamMedis,
     VoidCallback? onResepObat,
-    VoidCallback? onSettings,
     VoidCallback? onStaff,
   }) {
     return [
@@ -60,12 +59,6 @@ class AppMenus {
         title: 'Resep Obat',
         color: Colors.amber,
         onTap: onResepObat,
-      ),
-      MenuItemData(
-        icon: Icons.settings_rounded,
-        title: 'Pengaturan',
-        color: AppColors.menuSettings,
-        onTap: onSettings,
       ),
       MenuItemData(
         icon: Icons.badge_rounded,

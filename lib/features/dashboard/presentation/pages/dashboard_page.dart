@@ -73,20 +73,6 @@ class DashboardPage extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const ResepObatPage()),
         );
       },
-      onSettings: () {
-        if (uid.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AccountSettingsPage(
-                uid: uid,
-                role: role,
-                initialData: const {},
-              ),
-            ),
-          );
-        }
-      },
       onStaff: () {
         Navigator.push(
           context,

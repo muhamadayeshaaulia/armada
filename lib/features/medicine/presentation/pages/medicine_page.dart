@@ -178,7 +178,7 @@ class _MedicinePageState extends State<MedicinePage> {
                       await NotificationService().showNotification(
                         id: 50,
                         title: isEdit ? 'Data Obat Diubah' : 'Obat Baru Terdaftar',
-                        body: '${nameController.text.trim()} berhasil disimpan.',
+                        body: 'Data obat ${nameController.text.trim()} berhasil ${isEdit ? 'diperbarui' : 'ditambahkan'}.',
                       );
                     }
 

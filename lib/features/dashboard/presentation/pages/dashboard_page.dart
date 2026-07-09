@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_menus.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import 'notification_page.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/staff/presentation/pages/staff_page.dart';
@@ -250,6 +251,17 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                   ],
                                 ),
+                              ),
+
+                              // Notification Icon
+                              IconButton(
+                                icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const NotificationPage()),
+                                  );
+                                },
                               ),
                             ],
                           ),

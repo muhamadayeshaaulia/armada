@@ -23,7 +23,7 @@ class _AddPatientPageState extends State<AddPatientPage> {
   late final TextEditingController _namaController;
   late final TextEditingController _alamatController;
   late final TextEditingController _noTelpController;
-  
+
   DateTime? _tanggalLahir;
   String _jenisKelamin = 'Laki-laki';
   bool _isSaving = false;
@@ -36,7 +36,7 @@ class _AddPatientPageState extends State<AddPatientPage> {
     _namaController = TextEditingController(text: p?.namaLengkap ?? '');
     _alamatController = TextEditingController(text: p?.alamat ?? '');
     _noTelpController = TextEditingController(text: p?.noTelp ?? '');
-    
+
     if (p != null) {
       _tanggalLahir = p.tanggalLahir;
       _jenisKelamin = p.jenisKelamin;
@@ -111,7 +111,7 @@ class _AddPatientPageState extends State<AddPatientPage> {
       await NotificationService().showNotification(
         id: 30,
         title: widget.patient == null ? 'Pasien Ditambahkan' : 'Data Pasien Diperbarui',
-        body: '${_namaController.text.trim()} berhasil disimpan ke database.',
+        body: 'Data pasien ${_namaController.text.trim()} berhasil ${widget.patient == null ? 'ditambahkan' : 'diperbarui'}.',
       );
     }
 
@@ -141,7 +141,7 @@ class _AddPatientPageState extends State<AddPatientPage> {
             children: [
               Text('Informasi Demografis', style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary)),
               const SizedBox(height: 12),
-              
+
               _buildTextField(
                 controller: _namaController,
                 label: 'Nama Lengkap Pasien',

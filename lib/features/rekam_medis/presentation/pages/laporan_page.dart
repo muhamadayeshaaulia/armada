@@ -5,6 +5,10 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../bloc/rekam_medis_bloc.dart';
 import '../bloc/rekam_medis_event.dart';
 import '../bloc/rekam_medis_state.dart';
+import '../../domain/entities/rekam_medis_entity.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class LaporanPage extends StatefulWidget {
   const LaporanPage({super.key});
@@ -29,6 +33,142 @@ class _LaporanPageState extends State<LaporanPage> {
     super.dispose();
   }
 
+  Future<void> _printSummaryReport(List<RekamMedisEntity> records) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return [
+            pw.Header(
+              level: 0,
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('LAPORAN REKAM MEDIS - ARMADA', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+                  pw.Text(DateTime.now().toString().substring(0, 10)),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 20),
+            pw.TableHelper.fromTextArray(
+              headers: ['No', 'Tanggal', 'Pasien', 'Dokter', 'Diagnosis', 'Keluhan'],
+              data: List<List<dynamic>>.generate(records.length, (index) {
+                final r = records[index];
+                final dateStr = r.createdAt != null
+                    ? '${r.createdAt!.day}/${r.createdAt!.month}/${r.createdAt!.year}'
+                    : '-';
+                return [
+                  (index + 1).toString(),
+                  dateStr,
+                  r.namaPasien ?? '-',
+                  r.namaDokter ?? 'Umum',
+                  r.diagnosis,
+                  r.keluhan,
+                ];
+              }),
+              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+              cellHeight: 25,
+              cellAlignments: {
+                0: pw.Alignment.centerLeft,
+                1: pw.Alignment.centerLeft,
+                2: pw.Alignment.centerLeft,
+                3: pw.Alignment.centerLeft,
+                4: pw.Alignment.centerLeft,
+                5: pw.Alignment.centerLeft,
+              },
+            ),
+          ];
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
+  Future<void> _printSingleRecord(RekamMedisEntity r) async {
+    final pdf = pw.Document();
+
+    final dateStr = r.createdAt != null
+        ? '${r.createdAt!.day}/${r.createdAt!.month}/${r.createdAt!.year}'
+        : '-';
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(30),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Center(
+                  child: pw.Text('SURAT KETERANGAN REKAM MEDIS', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+                ),
+                pw.Center(
+                  child: pw.Text('KLINIK PRATAMA ARMADA', style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+                ),
+                pw.SizedBox(height: 10),
+                pw.Divider(),
+                pw.SizedBox(height: 20),
+                _buildPdfRow('Nama Pasien', r.namaPasien ?? '-'),
+                _buildPdfRow('Tanggal Periksa', dateStr),
+                _buildPdfRow('Dokter Pemeriksa', 'Dr. ${r.namaDokter ?? 'Umum'}'),
+                pw.SizedBox(height: 15),
+                pw.Divider(),
+                pw.SizedBox(height: 15),
+                _buildPdfRow('Keluhan Utama', r.keluhan),
+                _buildPdfRow('Hasil Pemeriksaan', r.hasilPemeriksaan),
+                _buildPdfRow('Diagnosis', r.diagnosis),
+                pw.SizedBox(height: 20),
+                if (r.resepList != null && r.resepList!.isNotEmpty) ...[
+                  pw.Text('Resep Obat:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13)),
+                  pw.SizedBox(height: 8),
+                  ...r.resepList!.map((resep) => pw.Bullet(
+                        text: '${resep.obat?.namaObat ?? 'Obat'} - Aturan: ${resep.aturanMinum} (Jml: ${resep.jumlahDiberikan} ${resep.obat?.satuan ?? ''})',
+                        style: const pw.TextStyle(fontSize: 11),
+                      )),
+                ],
+                pw.Spacer(),
+                pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Column(
+                    children: [
+                      pw.Text('Pemeriksa,', style: const pw.TextStyle(fontSize: 12)),
+                      pw.SizedBox(height: 60),
+                      pw.Text('Dr. ${r.namaDokter ?? 'Umum'}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
+  pw.Widget _buildPdfRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(width: 140, child: pw.Text('$label  :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+          pw.Expanded(child: pw.Text(value)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,6 +178,20 @@ class _LaporanPageState extends State<LaporanPage> {
         foregroundColor: Colors.white,
         title: const Text('Laporan Rekam Medis', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
+        actions: [
+          BlocBuilder<RekamMedisBloc, RekamMedisState>(
+            builder: (context, state) {
+              if (state is RekamMedisLoaded && state.records.isNotEmpty) {
+                return IconButton(
+                  icon: const Icon(Icons.print_rounded),
+                  onPressed: () => _printSummaryReport(state.records),
+                  tooltip: 'Cetak Laporan',
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +394,20 @@ class _LaporanPageState extends State<LaporanPage> {
                                               ],
                                             ),
                                           )),
-                                    ]
+                                    ],
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      onPressed: () => _printSingleRecord(r),
+                                      icon: const Icon(Icons.print_rounded, size: 16),
+                                      label: const Text('Cetak Rekam Medis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size(double.infinity, 40),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        elevation: 0,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               )

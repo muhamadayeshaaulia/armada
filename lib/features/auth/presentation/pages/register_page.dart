@@ -49,12 +49,8 @@ class _RegisterPageState extends State<RegisterPage> {
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) async {
-                if (state is AuthError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-                  );
-                } else if (state is AuthAuthenticated) {
-                  final registerNotifEnabled = await NotificationPrefs.isRegisterNotifEnabled();
+                if (state is AuthAuthenticated) {
+                  final registerNotifEnabled = await NotificationPrefs.isAutentikasiNotifEnabled();
                   if (registerNotifEnabled) {
                     NotificationService().showNotification(
                       id: 2,
@@ -62,10 +58,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       body: 'Selamat bergabung! Akun Anda telah berhasil dibuat.',
                     );
                   }
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Registrasi Berhasil!'), backgroundColor: Colors.green),
-                  );
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => const MainNavigationPage()),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/notification_prefs.dart';
 import '../../domain/entities/staff_entity.dart';
 import '../../../../injection_container.dart' as di;
 import '../../domain/usecases/add_staff_usecase.dart';
@@ -103,27 +105,19 @@ class _AddStaffPageState extends State<AddStaffPage> {
     setState(() => _isSaving = false);
 
     result.fold(
-      (failure) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menambahkan: ${failure.message}'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
-      (_) {
-        // Reload data
+      (failure) {}, // error ditangani oleh validator form
+      (_) async {
+        final enabled = await NotificationPrefs.isUmumNotifEnabled();
+        if (enabled) {
+          NotificationService().showNotification(
+            id: 10,
+            title: 'Petugas Berhasil Ditambahkan',
+            body: 'Data ${_namaController.text.trim()} telah tersimpan.',
+          );
+        }
+        if (!mounted) return;
         context.read<StaffBloc>().add(LoadStaffEvent());
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Petugas berhasil ditambahkan!'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
       },
     );
   }

@@ -11,10 +11,10 @@ class NotificationSettingsPage extends StatefulWidget {
 }
 
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
-  bool _notifLogin = true;
-  bool _notifRegister = true;
+  bool _notifUmum = true;
+  bool _notifAutentikasi = true;
+  bool _notifKeamanan = true;
   bool _isLoading = true;
-  bool _hasChanges = false;
 
   @override
   void initState() {
@@ -23,31 +23,26 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   }
 
   Future<void> _loadPreferences() async {
-    final login = await NotificationPrefs.isLoginNotifEnabled();
-    final register = await NotificationPrefs.isRegisterNotifEnabled();
+    final umum = await NotificationPrefs.isUmumNotifEnabled();
+    final autentikasi = await NotificationPrefs.isAutentikasiNotifEnabled();
+    final keamanan = await NotificationPrefs.isKeamananNotifEnabled();
+
     if (mounted) {
       setState(() {
-        _notifLogin = login;
-        _notifRegister = register;
+        _notifUmum = umum;
+        _notifAutentikasi = autentikasi;
+        _notifKeamanan = keamanan;
         _isLoading = false;
       });
     }
   }
 
   Future<void> _saveAndPop() async {
-    await NotificationPrefs.setLoginNotif(_notifLogin);
-    await NotificationPrefs.setRegisterNotif(_notifRegister);
-
+    await NotificationPrefs.setUmumNotif(_notifUmum);
+    await NotificationPrefs.setAutentikasiNotif(_notifAutentikasi);
+    await NotificationPrefs.setKeamananNotif(_notifKeamanan);
     if (!mounted) return;
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Preferensi notifikasi disimpan!'),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
   }
 
   @override
@@ -65,7 +60,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           : ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               children: [
-                _buildSectionTitle('Notifikasi Aktif'),
+                _buildSectionTitle('Kategori Notifikasi'),
                 const SizedBox(height: 12),
                 Container(
                   decoration: BoxDecoration(
@@ -76,57 +71,36 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   child: Column(
                     children: [
                       _buildSwitchTile(
-                        icon: Icons.login_rounded,
-                        iconColor: AppColors.primary,
-                        title: 'Notifikasi Login',
-                        subtitle: 'Tampilkan pemberitahuan saat Anda berhasil masuk',
-                        value: _notifLogin,
-                        onChanged: (val) => setState(() {
-                          _notifLogin = val;
-                          _hasChanges = true;
-                        }),
+                        icon: Icons.notifications_active_rounded,
+                        iconColor: Colors.blue,
+                        title: 'Notifikasi Umum',
+                        subtitle: 'Pemberitahuan tambah/edit petugas & edit profil',
+                        value: _notifUmum,
+                        onChanged: (v) => setState(() => _notifUmum = v),
                       ),
                       const Divider(height: 1, indent: 16, endIndent: 16),
                       _buildSwitchTile(
-                        icon: Icons.person_add_rounded,
-                        iconColor: Colors.teal,
-                        title: 'Notifikasi Registrasi',
-                        subtitle: 'Tampilkan pemberitahuan saat akun baru dibuat',
-                        value: _notifRegister,
-                        onChanged: (val) => setState(() {
-                          _notifRegister = val;
-                          _hasChanges = true;
-                        }),
+                        icon: Icons.shield_outlined,
+                        iconColor: AppColors.primary,
+                        title: 'Notifikasi Autentikasi',
+                        subtitle: 'Pemberitahuan login & registrasi akun',
+                        value: _notifAutentikasi,
+                        onChanged: (v) => setState(() => _notifAutentikasi = v),
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      _buildSwitchTile(
+                        icon: Icons.lock_outline_rounded,
+                        iconColor: Colors.orange,
+                        title: 'Notifikasi Keamanan',
+                        subtitle: 'Pemberitahuan perubahan kata sandi',
+                        value: _notifKeamanan,
+                        onChanged: (v) => setState(() => _notifKeamanan = v),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 24),
-
-                // Info
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Notifikasi lainnya akan tersedia seiring berkembangnya fitur aplikasi.',
-                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
+                const SizedBox(height: 40),
 
                 ElevatedButton(
                   onPressed: _saveAndPop,
@@ -168,10 +142,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       activeColor: AppColors.primary,
       secondary: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: iconColor.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: iconColor.withOpacity(0.1), shape: BoxShape.circle),
         child: Icon(icon, color: iconColor, size: 20),
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary)),

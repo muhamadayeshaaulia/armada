@@ -49,19 +49,9 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) async {
-                if (state is AuthError) {
-                  // Tampilkan pesan error jika login gagal
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                } else if (state is AuthAuthenticated) {
-                  // Cek apakah halaman ini aktif teratas untuk menghindari bentrok dengan RegisterPage
+                if (state is AuthAuthenticated) {
                   if (ModalRoute.of(context)?.isCurrent ?? false) {
-                    // Tampilkan notifikasi hanya jika diizinkan pengguna
-                    final loginNotifEnabled = await NotificationPrefs.isLoginNotifEnabled();
+                    final loginNotifEnabled = await NotificationPrefs.isAutentikasiNotifEnabled();
                     if (loginNotifEnabled) {
                       NotificationService().showNotification(
                         id: 1,
@@ -69,14 +59,6 @@ class _LoginPageState extends State<LoginPage> {
                         body: 'Login berhasil, Anda sekarang berada di beranda Armada.',
                       );
                     }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Login Berhasil!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                    // Pindah ke Dashboard dan hapus riwayat halaman login
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => const MainNavigationPage()),

@@ -1,27 +1,27 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Kunci key yang dipakai untuk menyimpan preferensi notifikasi
 class NotificationPrefs {
-  static const String keyNotifLogin = 'notif_login';
-  static const String keyNotifRegister = 'notif_register';
+  static const String keyNotifUmum = 'notif_umum';
+  static const String keyNotifAutentikasi = 'notif_autentikasi';
+  static const String keyNotifKeamanan = 'notif_keamanan';
 
-  static Future<bool> isLoginNotifEnabled() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(keyNotifLogin) ?? true; // default: aktif
-  }
+  // ── Getters ──────────────────────────────────────────
+  static Future<bool> isUmumNotifEnabled() async =>
+      (await SharedPreferences.getInstance()).getBool(keyNotifUmum) ?? true;
 
-  static Future<bool> isRegisterNotifEnabled() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(keyNotifRegister) ?? true; // default: aktif
-  }
+  static Future<bool> isAutentikasiNotifEnabled() async =>
+      (await SharedPreferences.getInstance()).getBool(keyNotifAutentikasi) ?? true;
 
-  static Future<void> setLoginNotif(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(keyNotifLogin, value);
-  }
+  static Future<bool> isKeamananNotifEnabled() async =>
+      (await SharedPreferences.getInstance()).getBool(keyNotifKeamanan) ?? true;
 
-  static Future<void> setRegisterNotif(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(keyNotifRegister, value);
-  }
+  // ── Setters ──────────────────────────────────────────
+  static Future<void> setUmumNotif(bool v) async =>
+      (await SharedPreferences.getInstance()).setBool(keyNotifUmum, v);
+
+  static Future<void> setAutentikasiNotif(bool v) async =>
+      (await SharedPreferences.getInstance()).setBool(keyNotifAutentikasi, v);
+
+  static Future<void> setKeamananNotif(bool v) async =>
+      (await SharedPreferences.getInstance()).setBool(keyNotifKeamanan, v);
 }

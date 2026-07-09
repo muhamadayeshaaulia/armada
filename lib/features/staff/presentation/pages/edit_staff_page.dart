@@ -8,6 +8,8 @@ import '../../../../injection_container.dart' as di;
 import '../../domain/usecases/update_staff_usecase.dart';
 import '../bloc/staff_bloc.dart';
 import '../bloc/staff_event.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/notification_prefs.dart';
 
 class EditStaffPage extends StatefulWidget {
   final StaffEntity staff;
@@ -100,27 +102,19 @@ class _EditStaffPageState extends State<EditStaffPage> {
     setState(() => _isSaving = false);
 
     result.fold(
-      (failure) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menyimpan: ${failure.message}'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
-      (_) {
-        // Reload data di StaffPage
+      (failure) {}, // gagal diam-diam, form validator sudah menjaga
+      (_) async {
+        final enabled = await NotificationPrefs.isUmumNotifEnabled();
+        if (enabled) {
+          NotificationService().showNotification(
+            id: 11,
+            title: 'Data Petugas Diperbarui',
+            body: 'Data ${_namaController.text.trim()} berhasil disimpan.',
+          );
+        }
+        if (!mounted) return;
         context.read<StaffBloc>().add(LoadStaffEvent());
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Data berhasil diperbarui!'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
       },
     );
   }

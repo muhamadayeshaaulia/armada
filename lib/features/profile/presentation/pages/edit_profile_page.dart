@@ -4,6 +4,8 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../staff/domain/entities/staff_entity.dart';
 import '../../../staff/domain/usecases/update_staff_usecase.dart';
 import '../../../../injection_container.dart' as di;
+import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/notification_prefs.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String uid;
@@ -107,17 +109,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() => _isSaving = false);
 
     result.fold(
-      (failure) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memperbarui profil: ${failure.message}'),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
-      (_) {
-        Navigator.pop(context, true); // kembalikan true untuk memicu reload profil
+      (failure) {},
+      (_) async {
+        final enabled = await NotificationPrefs.isUmumNotifEnabled();
+        if (enabled) {
+          NotificationService().showNotification(
+            id: 12,
+            title: 'Profil Diperbarui',
+            body: 'Data profil Anda berhasil disimpan.',
+          );
+        }
+        if (!mounted) return;
+        Navigator.pop(context, true);
       },
     );
   }

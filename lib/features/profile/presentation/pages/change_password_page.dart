@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/notification_prefs.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -38,29 +40,27 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null && user.email != null) {
-        // 1. Re-otentikasi pengguna dengan password saat ini
         final credential = EmailAuthProvider.credential(
           email: user.email!,
           password: _currentPasswordController.text.trim(),
         );
         
         await user.reauthenticateWithCredential(credential);
-        
-        // 2. Jika sukses, perbarui password baru
         await user.updatePassword(_newPasswordController.text.trim());
         
         if (!mounted) return;
         setState(() => _isSaving = false);
-        
+
+        // Tampilkan notifikasi keamanan jika diizinkan
+        final enabled = await NotificationPrefs.isKeamananNotifEnabled();
+        if (enabled) {
+          NotificationService().showNotification(
+            id: 20,
+            title: 'Kata Sandi Diperbarui',
+            body: 'Kata sandi akun Anda berhasil diubah.',
+          );
+        }
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Kata sandi berhasil diperbarui!'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
       } else {
         throw Exception('User tidak terdeteksi.');
       }
@@ -69,27 +69,40 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       setState(() => _isSaving = false);
       
       String message = 'Terjadi kesalahan.';
-      if (e.code == 'wrong-password') {
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
         message = 'Kata sandi saat ini salah.';
       } else if (e.code == 'weak-password') {
-        message = 'Kata sandi baru terlalu lemah.';
+        message = 'Kata sandi baru terlalu lemah (min. 6 karakter).';
       }
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+
+      // Tampilkan error sebagai dialog, bukan snackbar
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Gagal Mengubah Kata Sandi'),
           content: Text(message),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
         ),
       );
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSaving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Error'),
           content: Text(e.toString()),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
         ),
       );
     }
@@ -120,7 +133,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               const SizedBox(height: 24),
               
-              // Current Password
               _buildPasswordField(
                 controller: _currentPasswordController,
                 label: 'Kata Sandi Saat Ini',
@@ -130,7 +142,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               const SizedBox(height: 16),
               
-              // New Password
               _buildPasswordField(
                 controller: _newPasswordController,
                 label: 'Kata Sandi Baru',
@@ -146,7 +157,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               const SizedBox(height: 16),
               
-              // Confirm Password
               _buildPasswordField(
                 controller: _confirmPasswordController,
                 label: 'Konfirmasi Kata Sandi Baru',

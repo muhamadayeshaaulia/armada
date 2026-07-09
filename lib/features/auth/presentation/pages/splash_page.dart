@@ -62,7 +62,7 @@ class _SplashPageState extends State<SplashPage> {
               ),
               SizedBox(height: 8),
               Text(
-                'Sistem Manajemen Klinik',
+                'Aplikasi Rekam Medis dan Data Obat',
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 14,

@@ -266,40 +266,65 @@ class _AddRekamMedisPageState extends State<AddRekamMedisPage> {
 
                     if (patientState is PatientLoaded) {
                       final patients = patientState.patients;
-                      
-                      // Inisialisasi _selectedPatient ke item pertama jika belum diset
-                      if (_selectedPatient == null && patients.isNotEmpty) {
-                        _selectedPatient = patients.first;
-                      }
 
-                      return Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.borderColor),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _selectedPatient?.id,
-                            isExpanded: true,
-                            hint: const Text('Pilih Pasien'),
-                            items: patients.map((p) {
-                              return DropdownMenuItem(
-                                value: p.id,
-                                child: Text('${p.namaLengkap} (NIK: ${p.nik ?? "-"})', style: const TextStyle(fontSize: 14)),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() {
-                                  _selectedPatient = patients.firstWhere((p) => p.id == val);
-                                });
-                              }
-                            },
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.borderColor),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedPatient?.id,
+                                isExpanded: true,
+                                hint: const Text('Pilih Pasien'),
+                                items: patients.map((p) {
+                                  return DropdownMenuItem(
+                                    value: p.id,
+                                    child: Text(p.namaLengkap, style: const TextStyle(fontSize: 14)),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() {
+                                      _selectedPatient = patients.firstWhere((p) => p.id == val);
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
                           ),
-                        ),
+                          if (_selectedPatient != null) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.06),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _selectedPatient!.namaLengkap,
+                                    style: AppTextStyles.labelBold.copyWith(fontSize: 15, color: AppColors.primary),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text('NIK: ${_selectedPatient!.nik ?? "-"}', style: AppTextStyles.bodySmall),
+                                  Text('Tanggal Lahir: ${_selectedPatient!.tanggalLahir.day}-${_selectedPatient!.tanggalLahir.month}-${_selectedPatient!.tanggalLahir.year}', style: AppTextStyles.bodySmall),
+                                  Text('Jenis Kelamin: ${_selectedPatient!.jenisKelamin}', style: AppTextStyles.bodySmall),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       );
                     }
 

@@ -112,77 +112,78 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundPage,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── HEADER (Sticky at the top!) ──────────────────────────────────
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                String email = 'Memuat...';
-                String roleName = 'Memuat...';
-                String name = 'Pengguna';
+      body: Column(
+        children: [
+          // ── HEADER (Sticky at the top!) ──────────────────────────────────
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              String email = 'Memuat...';
+              String roleName = 'Memuat...';
+              String name = 'Pengguna';
 
-                if (state is AuthAuthenticated) {
-                  email = state.user.email;
-                  roleName = state.user.role.toUpperCase();
-                  name = _extractNameFromEmail(email);
-                }
+              if (state is AuthAuthenticated) {
+                email = state.user.email;
+                roleName = state.user.role.toUpperCase();
+                name = _extractNameFromEmail(email);
+              }
 
-                return Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryLight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(36),
-                      bottomRight: Radius.circular(36),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 12,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
+              return Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(36),
-                      bottomRight: Radius.circular(36),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(36),
+                    bottomRight: Radius.circular(36),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 12,
+                      offset: Offset(0, 6),
                     ),
-                    child: Stack(
-                      children: [
-                        // Decorative Bubble 1 (Background decoration)
-                        Positioned(
-                          right: -40,
-                          top: -40,
-                          child: Container(
-                            width: 130,
-                            height: 130,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.08),
-                            ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(36),
+                    bottomRight: Radius.circular(36),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Decorative Bubble 1 (Background decoration)
+                      Positioned(
+                        right: -40,
+                        top: -40,
+                        child: Container(
+                          width: 130,
+                          height: 130,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
                           ),
                         ),
-                        // Decorative Bubble 2
-                        Positioned(
-                          left: -20,
-                          bottom: -40,
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.05),
-                            ),
+                      ),
+                      // Decorative Bubble 2
+                      Positioned(
+                        left: -20,
+                        bottom: -40,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.05),
                           ),
                         ),
-                        // Real Content
-                        Padding(
+                      ),
+                      // Real Content wrapped in SafeArea (bottom: false)
+                      SafeArea(
+                        bottom: false,
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                           child: Row(
                             children: [
@@ -252,174 +253,174 @@ class _DashboardPageState extends State<DashboardPage> {
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
+                ),
+              );
+            },
+          ),
+
+          // ── SCROLLABLE CONTENT ──────────────────────────────────────────
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                context.read<MedicineBloc>().add(LoadMedicinesEvent());
+                context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
               },
-            ),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 100), // Prevent overlap with bottom nav bar
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Menu Utama', style: AppTextStyles.heading3),
+                      const SizedBox(height: 16),
+                      
+                      // GridView Menu Utama
+                      GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.zero,
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.95,
+                        children: menus
+                            .map((menu) => _buildMenuCard(menu))
+                            .toList(),
+                      ),
+                      
+                      const SizedBox(height: 32),
 
-            // ── SCROLLABLE CONTENT ──────────────────────────────────────────
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  context.read<MedicineBloc>().add(LoadMedicinesEvent());
-                  context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
-                },
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 100), // Prevent overlap with bottom nav bar
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Menu Utama', style: AppTextStyles.heading3),
-                        const SizedBox(height: 16),
-                        
-                        // GridView Menu Utama
-                        GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.zero,
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.95,
-                          children: menus
-                              .map((menu) => _buildMenuCard(menu))
-                              .toList(),
-                        ),
-                        
-                        const SizedBox(height: 32),
-
-                        // ── SECTION 1: STOK OBAT TERSEDIA ────────────────────────────
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Stok Obat Tersedia', style: AppTextStyles.heading3),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const MedicinePage()),
-                                ).then((_) {
-                                  context.read<MedicineBloc>().add(LoadMedicinesEvent());
-                                });
-                              },
-                              child: const Text(
-                                'Lihat Semua',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
+                      // ── SECTION 1: STOK OBAT TERSEDIA ────────────────────────────
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Stok Obat Tersedia', style: AppTextStyles.heading3),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const MedicinePage()),
+                              ).then((_) {
+                                context.read<MedicineBloc>().add(LoadMedicinesEvent());
+                              });
+                            },
+                            child: const Text(
+                              'Lihat Semua',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
 
-                        BlocBuilder<MedicineBloc, MedicineState>(
-                          builder: (context, state) {
-                            if (state is MedicineLoading) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 20),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
-                            if (state is MedicineLoaded) {
-                              final medicines = state.medicines;
-                              if (medicines.isEmpty) {
-                                return _buildEmptyCard('Belum ada data obat.');
-                              }
-                              return SizedBox(
-                                height: 110,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: medicines.length,
-                                  itemBuilder: (context, index) {
-                                    final medicine = medicines[index];
-                                    return _buildMedicineStockCard(medicine);
-                                  },
-                                ),
-                              );
-                            }
-                            return _buildEmptyCard('Gagal memuat data obat.');
-                          },
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // ── SECTION 2: PASIEN REKAM MEDIS ───────────────────────────
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Pasien Sudah Rekam Medis', style: AppTextStyles.heading3),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Rekam Medis')),
-                                ).then((_) {
-                                  context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
-                                });
-                              },
-                              child: const Text(
-                                'Lihat Semua',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
+                      BlocBuilder<MedicineBloc, MedicineState>(
+                        builder: (context, state) {
+                          if (state is MedicineLoading) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: CircularProgressIndicator(),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        BlocBuilder<RekamMedisBloc, RekamMedisState>(
-                          builder: (context, state) {
-                            if (state is RekamMedisLoading) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 20),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
+                            );
+                          }
+                          if (state is MedicineLoaded) {
+                            final medicines = state.medicines;
+                            if (medicines.isEmpty) {
+                              return _buildEmptyCard('Belum ada data obat.');
                             }
-                            if (state is RekamMedisLoaded) {
-                              final records = state.records;
-                              if (records.isEmpty) {
-                                return _buildEmptyCard('Belum ada pasien rekam medis.');
-                              }
-                              
-                              // Ambil 5 rekam medis terbaru
-                              final recentRecords = records.take(5).toList();
-
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: recentRecords.length,
+                            return SizedBox(
+                              height: 110,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: medicines.length,
                                 itemBuilder: (context, index) {
-                                  final record = recentRecords[index];
-                                  return _buildRecentPatientCard(record);
+                                  final medicine = medicines[index];
+                                  return _buildMedicineStockCard(medicine);
                                 },
-                              );
+                              ),
+                            );
+                          }
+                          return _buildEmptyCard('Gagal memuat data obat.');
+                        },
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // ── SECTION 2: PASIEN REKAM MEDIS ───────────────────────────
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Pasien Sudah Rekam Medis', style: AppTextStyles.heading3),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Rekam Medis')),
+                              ).then((_) {
+                                context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
+                              });
+                            },
+                            child: const Text(
+                              'Lihat Semua',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      BlocBuilder<RekamMedisBloc, RekamMedisState>(
+                        builder: (context, state) {
+                          if (state is RekamMedisLoading) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          if (state is RekamMedisLoaded) {
+                            final records = state.records;
+                            if (records.isEmpty) {
+                              return _buildEmptyCard('Belum ada pasien rekam medis.');
                             }
-                            return _buildEmptyCard('Gagal memuat data rekam medis.');
-                          },
-                        ),
-                      ],
-                    ),
+                            
+                            // Ambil 5 rekam medis terbaru
+                            final recentRecords = records.take(5).toList();
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: recentRecords.length,
+                              itemBuilder: (context, index) {
+                                final record = recentRecords[index];
+                                return _buildRecentPatientCard(record);
+                              },
+                            );
+                          }
+                          return _buildEmptyCard('Gagal memuat data rekam medis.');
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

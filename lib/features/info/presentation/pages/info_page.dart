@@ -9,65 +9,109 @@ class InfoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundPage,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
+      body: Column(
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Stack(
+                  children: [
+                    // Decorative Bubble 1 (Background decoration)
+                    Positioned(
+                      right: -40,
+                      top: -40,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                    ),
+                    // Decorative Bubble 2
+                    Positioned(
+                      left: -20,
+                      bottom: -30,
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.05),
+                        ),
+                      ),
+                    ),
+                    // Real Content
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Informasi', style: AppTextStyles.headerTitle),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Seputar aplikasi ARMADA',
+                            style: AppTextStyles.headerSubtitle,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Informasi', style: AppTextStyles.headerTitle),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Seputar aplikasi ARMADA',
-                    style: AppTextStyles.headerSubtitle,
-                  ),
-                ],
-              ),
             ),
+          ),
 
-            const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-            // Konten
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                children: [
-                  _buildInfoCard(
-                    icon: Icons.info_rounded,
-                    color: AppColors.info,
-                    title: 'Tentang ARMADA',
-                    subtitle: 'Aplikasi manajemen rekam medis dan data administrasi klinik.',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoCard(
-                    icon: Icons.update_rounded,
-                    color: AppColors.success,
-                    title: 'Versi Aplikasi',
-                    subtitle: 'v1.0.0 — Rilis perdana',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoCard(
-                    icon: Icons.support_agent_rounded,
-                    color: AppColors.warning,
-                    title: 'Hubungi Support',
-                    subtitle: 'support@armada.app',
-                  ),
-                ],
-              ),
+          // Konten
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              children: [
+                _buildInfoCard(
+                  icon: Icons.info_rounded,
+                  color: AppColors.info,
+                  title: 'Tentang ARMADA',
+                  subtitle: 'Aplikasi manajemen rekam medis dan data administrasi klinik.',
+                ),
+                const SizedBox(height: 16),
+                _buildInfoCard(
+                  icon: Icons.update_rounded,
+                  color: AppColors.success,
+                  title: 'Versi Aplikasi',
+                  subtitle: 'v1.0.0 — Rilis perdana',
+                ),
+                const SizedBox(height: 16),
+                _buildInfoCard(
+                  icon: Icons.support_agent_rounded,
+                  color: AppColors.warning,
+                  title: 'Hubungi Support',
+                  subtitle: 'support@armada.app',
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

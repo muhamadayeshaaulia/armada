@@ -60,7 +60,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       // Fold dari dartz akan mengecek apakah result itu Left (Gagal) atau Right (Sukses)
       result.fold(
-        (failure) => emit(AuthError(failure.message)),
+        (failure) {
+          // Parse prefix kode untuk menentukan field yang error
+          final raw = failure.message;
+          if (raw.startsWith('[EMAIL_ERROR]')) {
+            emit(AuthError(raw.replaceFirst('[EMAIL_ERROR]', ''), errorType: AuthErrorType.email));
+          } else if (raw.startsWith('[PASSWORD_ERROR]')) {
+            emit(AuthError(raw.replaceFirst('[PASSWORD_ERROR]', ''), errorType: AuthErrorType.password));
+          } else if (raw.startsWith('[BOTH_ERROR]')) {
+            emit(AuthError(raw.replaceFirst('[BOTH_ERROR]', ''), errorType: AuthErrorType.both));
+          } else {
+            final clean = raw.replaceFirst(RegExp(r'^\[.*?\]'), '');
+            emit(AuthError(clean, errorType: AuthErrorType.general));
+          }
+        },
         (user) => emit(AuthAuthenticated(user)),
       );
     });

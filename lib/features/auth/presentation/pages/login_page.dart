@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _authErrorMessage;
+  AuthError? _authError;
 
   @override
   void dispose() {
@@ -29,30 +29,31 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// Email menunjukkan centang hijau HANYA saat error-nya ada di password saja
+  bool get _emailVerified =>
+      _authError != null && _authError!.errorType == AuthErrorType.password;
+
+  /// Error di field email: jika tipe error 'email' atau 'both'
   String? get _emailErrorText {
-    if (_authErrorMessage == null) return null;
-    final err = _authErrorMessage!.toLowerCase();
-    if (err.contains('email') || err.contains('kredensial') || err.contains('credential') || err.contains('tidak valid')) {
-      return _authErrorMessage;
-    }
+    if (_authError == null) return null;
+    if (_authError!.errorType == AuthErrorType.email) return _authError!.message;
+    if (_authError!.errorType == AuthErrorType.both) return 'Email tidak terdaftar';
     return null;
   }
 
+  /// Error di field password: jika tipe error 'password' atau 'both'
   String? get _passwordErrorText {
-    if (_authErrorMessage == null) return null;
-    final err = _authErrorMessage!.toLowerCase();
-    if (err.contains('password') || err.contains('kredensial') || err.contains('credential') || err.contains('tidak valid')) {
-      return _authErrorMessage;
-    }
+    if (_authError == null) return null;
+    if (_authError!.errorType == AuthErrorType.password) return _authError!.message;
+    if (_authError!.errorType == AuthErrorType.both) return 'Password salah';
     return null;
   }
 
   void _onLoginPressed() {
     setState(() {
-      _authErrorMessage = null;
+      _authError = null;
     });
     if (_formKey.currentState!.validate()) {
-      // Mengirim event login ke BLoC
       context.read<AuthBloc>().add(
         LoginRequested(
           email: _emailController.text.trim(),
@@ -89,9 +90,23 @@ class _LoginPageState extends State<LoginPage> {
                     );
                   }
                 } else if (state is AuthError) {
-                  setState(() {
-                    _authErrorMessage = state.message;
-                  });
+                  if (state.errorType == AuthErrorType.general) {
+                    // Error umum (bukan per-field) → tampilkan snackbar
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red.shade700,
+                      ),
+                    );
+                  } else {
+                    setState(() {
+                      _authError = state;
+                    });
+                    // Trigger ulang validator agar error muncul di dalam field
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _formKey.currentState?.validate();
+                    });
+                  }
                 }
               },
               builder: (context, state) {
@@ -131,25 +146,49 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (_) {
-                          if (_authErrorMessage != null) {
-                            setState(() {
-                              _authErrorMessage = null;
-                            });
+                          if (_authError != null) {
+                            setState(() { _authError = null; });
                           }
                         },
                         decoration: InputDecoration(
                           labelText: 'Email',
                           prefixIcon: const Icon(Icons.email),
-                          errorText: _emailErrorText,
+                          // Centang hijau jika email terbukti terdaftar (hanya password salah)
+                          suffixIcon: _emailVerified
+                              ? const Icon(Icons.check_circle_rounded, color: Colors.green)
+                              : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: _emailErrorText != null
+                                  ? Colors.red
+                                  : _emailVerified
+                                      ? Colors.green
+                                      : AppColors.primary,
+                              width: 2,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: _emailErrorText != null
+                                  ? Colors.red
+                                  : _emailVerified
+                                      ? Colors.green
+                                      : Colors.grey.shade400,
+                            ),
+                          ),
                         ),
+                        // Validator mengembalikan auth error agar TextFormField
+                        // menampilkannya via FormField (field.errorText), bukan InputDecoration
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Email tidak boleh kosong';
                           }
-                          return null;
+                          return _emailErrorText; // null jika tidak ada error
                         },
                       ),
                       const SizedBox(height: 16),
@@ -159,28 +198,43 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _passwordController,
                         obscureText: true,
                         onChanged: (_) {
-                          if (_authErrorMessage != null) {
-                            setState(() {
-                              _authErrorMessage = null;
-                            });
+                          if (_authError != null) {
+                            setState(() { _authError = null; });
                           }
                         },
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: const Icon(Icons.lock),
-                          errorText: _passwordErrorText,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: _passwordErrorText != null
+                                  ? Colors.red
+                                  : AppColors.primary,
+                              width: 2,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: _passwordErrorText != null
+                                  ? Colors.red
+                                  : Colors.grey.shade400,
+                            ),
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Password tidak boleh kosong';
                           }
-                          return null;
+                          return _passwordErrorText; // null jika tidak ada error
                         },
                       ),
                       const SizedBox(height: 24),
+
 
                       // Tombol Login
                       ElevatedButton(

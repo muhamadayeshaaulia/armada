@@ -36,34 +36,44 @@ class AuthRepositoryImpl implements AuthRepository {
         email,
         password,
       );
-      return Right(userModel); // Berhasil (Right)
+      return Right(userModel);
     } on FirebaseAuthException catch (e) {
       // Tangkap error spesifik dari Firebase
-      String errorMessage = 'Terjadi kesalahan autentikasi';
       if (e.code == 'user-not-found') {
-        errorMessage = 'Email tidak terdaftar';
+        // Kode lama (Firebase SDK sebelum v9)
+        return const Left(AuthFailure('[EMAIL_ERROR]Email tidak terdaftar'));
       } else if (e.code == 'wrong-password') {
-        errorMessage = 'Password salah';
-      } else if (e.code == 'invalid-credential') {
-        errorMessage = 'Email tidak terdaftar atau password salah';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'Format email tidak valid';
-      } else if (e.code == 'user-disabled') {
-        errorMessage = 'Akun ini telah dinonaktifkan';
-      } else if (e.code == 'too-many-requests') {
-        errorMessage = 'Terlalu banyak percobaan masuk yang gagal. Silakan coba lagi nanti.';
-      } else if (e.message != null) {
-        // Fallback translation if message contains certain terms
-        final msg = e.message!.toLowerCase();
-        if (msg.contains('incorrect') || msg.contains('expired') || msg.contains('malformed')) {
-          errorMessage = 'Email tidak terdaftar atau password salah';
-        } else {
-          errorMessage = e.message!;
+        // Kode lama (Firebase SDK sebelum v9)
+        return const Left(AuthFailure('[PASSWORD_ERROR]Password salah'));
+      } else if (e.code == 'invalid-credential' ||
+          (e.message?.toLowerCase().contains('incorrect') ?? false) ||
+          (e.message?.toLowerCase().contains('malformed') ?? false) ||
+          (e.message?.toLowerCase().contains('expired') ?? false)) {
+        // Firebase SDK modern (v6+) menggabungkan semua kegagalan login ke 'invalid-credential'
+        // → Gunakan sendPasswordResetEmail untuk cek apakah email terdaftar
+        //   (tidak benar-benar mengirim email karena kita tidak pernah konfirmasi ke user)
+        try {
+          await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+          // Jika tidak ada exception → email terdaftar → password yang salah
+          return const Left(AuthFailure('[PASSWORD_ERROR]Password salah'));
+        } on FirebaseAuthException catch (resetErr) {
+          if (resetErr.code == 'user-not-found' ||
+              resetErr.code == 'invalid-email' ||
+              resetErr.code == 'invalid-recipient-email') {
+            // Email tidak terdaftar
+            return const Left(AuthFailure('[EMAIL_ERROR]Email tidak terdaftar'));
+          }
+          // Error lain saat cek (misal: quota habis) → tampilkan error gabungan
+          return const Left(AuthFailure('[BOTH_ERROR]Email tidak terdaftar atau password salah'));
         }
+      } else if (e.code == 'user-disabled') {
+        return const Left(AuthFailure('[GENERAL_ERROR]Akun ini telah dinonaktifkan'));
+      } else if (e.code == 'too-many-requests') {
+        return const Left(AuthFailure('[GENERAL_ERROR]Terlalu banyak percobaan gagal. Coba lagi nanti.'));
+      } else {
+        return Left(AuthFailure('[GENERAL_ERROR]${e.message ?? 'Terjadi kesalahan autentikasi'}'));
       }
-      return Left(AuthFailure(errorMessage));
     } catch (e) {
-      // Tangkap error umum
       return Left(ServerFailure(e.toString()));
     }
   }

@@ -21,13 +21,22 @@ class AuthAuthenticated extends AuthState {
   List<Object> get props => [user];
 }
 
+/// Jenis field mana yang mengalami error autentikasi
+enum AuthErrorType {
+  email,      // email tidak ditemukan / format salah
+  password,   // email benar tapi password salah
+  both,       // keduanya gagal (invalid-credential gabungan)
+  general,    // error umum (disabled, too-many-requests, dsb)
+}
+
 class AuthError extends AuthState {
   final String message;
+  final AuthErrorType errorType;
 
-  const AuthError(this.message);
+  const AuthError(this.message, {this.errorType = AuthErrorType.general});
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [message, errorType];
 }
 
 class AuthUnauthenticated extends AuthState {}

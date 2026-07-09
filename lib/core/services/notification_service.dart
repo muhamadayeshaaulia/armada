@@ -142,4 +142,16 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_historyKey);
   }
+
+  Future<void> deleteNotification(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? historyJson = prefs.getString(_historyKey);
+    if (historyJson != null) {
+      final List<dynamic> decoded = jsonDecode(historyJson);
+      if (index >= 0 && index < decoded.length) {
+        decoded.removeAt(index);
+        await prefs.setString(_historyKey, jsonEncode(decoded));
+      }
+    }
+  }
 }

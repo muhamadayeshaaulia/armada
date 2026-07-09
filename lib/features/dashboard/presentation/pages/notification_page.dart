@@ -112,7 +112,25 @@ class _NotificationPageState extends State<NotificationPage> {
                   separatorBuilder: (context, index) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final item = _notifications[index];
-                    return Container(
+                    return Dismissible(
+                      key: Key('${item.timestamp.toIso8601String()}_$index'),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                      ),
+                      onDismissed: (direction) async {
+                        await _notificationService.deleteNotification(index);
+                        setState(() {
+                          _notifications.removeAt(index);
+                        });
+                      },
+                      child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: item.isRead ? Colors.white : AppColors.primary.withOpacity(0.02),
@@ -173,8 +191,9 @@ class _NotificationPageState extends State<NotificationPage> {
                           ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+                  );
+                },
                 ),
     );
   }

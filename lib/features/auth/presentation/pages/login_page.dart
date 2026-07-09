@@ -57,25 +57,28 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   );
                 } else if (state is AuthAuthenticated) {
-                  // Munculkan notifikasi lokal
-                  NotificationService().showNotification(
-                    id: 1,
-                    title: 'Selamat Datang Kembali!',
-                    body: 'Login berhasil, Anda sekarang berada di beranda Armada.',
-                  );
+                  // Cek apakah halaman ini aktif teratas untuk menghindari bentrok dengan RegisterPage
+                  if (ModalRoute.of(context)?.isCurrent ?? false) {
+                    // Munculkan notifikasi lokal
+                    NotificationService().showNotification(
+                      id: 1,
+                      title: 'Selamat Datang Kembali!',
+                      body: 'Login berhasil, Anda sekarang berada di beranda Armada.',
+                    );
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Login Berhasil!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                  // Pindah ke Dashboard dan hapus riwayat halaman login
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainNavigationPage()),
-                    (route) => false,
-                  );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Login Berhasil!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    // Pindah ke Dashboard dan hapus riwayat halaman login
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainNavigationPage()),
+                      (route) => false,
+                    );
+                  }
                 }
               },
               builder: (context, state) {

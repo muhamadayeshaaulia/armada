@@ -24,6 +24,19 @@ class ProfilePage extends StatelessWidget {
     }
   }
 
+  String _formatDate(String isoString) {
+    try {
+      final date = DateTime.parse(isoString).toLocal();
+      final months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      ];
+      return '${date.day} ${months[date.month - 1]} ${date.year}';
+    } catch (e) {
+      return isoString;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,6 +160,16 @@ class ProfilePage extends StatelessWidget {
                             const SizedBox(height: 12),
                           ],
 
+                           if (data?['alamat'] != null) ...[
+                            _buildProfileTile(
+                              icon: Icons.home_rounded,
+                              color: AppColors.primaryLight,
+                              label: 'Alamat',
+                              value: data!['alamat'],
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
                           if (data?['no_telp'] != null) ...[
                             _buildProfileTile(
                               icon: Icons.phone_rounded,
@@ -167,12 +190,12 @@ class ProfilePage extends StatelessWidget {
                             const SizedBox(height: 12),
                           ],
 
-                          if (data?['alamat'] != null) ...[
+                          if (data?['created_at'] != null) ...[
                             _buildProfileTile(
-                              icon: Icons.home_rounded,
-                              color: AppColors.primaryLight,
-                              label: 'Alamat',
-                              value: data!['alamat'],
+                              icon: Icons.calendar_today_rounded,
+                              color: Colors.teal,
+                              label: 'Bergabung Sejak',
+                              value: _formatDate(data!['created_at']),
                             ),
                             const SizedBox(height: 12),
                           ],

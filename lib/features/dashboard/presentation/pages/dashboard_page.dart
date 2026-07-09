@@ -64,6 +64,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     final menus = AppMenus.getDashboardMenus(
+      role: role,
       onPatient: () {
         Navigator.push(
           context,
@@ -364,7 +365,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Rekam Medis')),
+                                MaterialPageRoute(builder: (_) => const LaporanPage(title: 'Laporan Rekam Medis')),
                               ).then((_) {
                                 context.read<RekamMedisBloc>().add(LoadRekamMedisEvent());
                               });

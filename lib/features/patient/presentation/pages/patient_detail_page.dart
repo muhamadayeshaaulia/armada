@@ -266,7 +266,8 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                   'Riwayat Pemeriksaan',
                   style: AppTextStyles.heading3.copyWith(color: AppColors.textPrimary, fontSize: 16),
                 ),
-                ElevatedButton.icon(
+                if (!widget.isFromLaporan)
+                  ElevatedButton.icon(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -416,33 +417,35 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                                     const SizedBox(height: 16),
                                     Row(
                                       children: [
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) => AddRekamMedisPage(
-                                                    patient: widget.patient,
-                                                    record: r,
+                                        if (!widget.isFromLaporan) ...[
+                                          Expanded(
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => AddRekamMedisPage(
+                                                      patient: widget.patient,
+                                                      record: r,
+                                                    ),
                                                   ),
-                                                ),
-                                              ).then((_) {
-                                                context.read<RekamMedisBloc>().add(LoadRekamMedisForPatientEvent(widget.patient.id));
-                                              });
-                                            },
-                                            icon: const Icon(Icons.edit_rounded, size: 16),
-                                            label: const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppColors.primary.withOpacity(0.1),
-                                              foregroundColor: AppColors.primary,
-                                              minimumSize: const Size(0, 40),
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                              elevation: 0,
+                                                ).then((_) {
+                                                  context.read<RekamMedisBloc>().add(LoadRekamMedisForPatientEvent(widget.patient.id));
+                                                });
+                                              },
+                                              icon: const Icon(Icons.edit_rounded, size: 16),
+                                              label: const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppColors.primary.withOpacity(0.1),
+                                                foregroundColor: AppColors.primary,
+                                                minimumSize: const Size(0, 40),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                elevation: 0,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 12),
+                                          const SizedBox(width: 12),
+                                        ],
                                         Expanded(
                                           child: ElevatedButton.icon(
                                             onPressed: () => _printSingleRecord(r),

@@ -22,6 +22,7 @@ class AppMenus {
   AppMenus._(); // Prevent instantiation
 
   static List<MenuItemData> getDashboardMenus({
+    required String role,
     VoidCallback? onPatient,
     VoidCallback? onMedicine,
     VoidCallback? onReport,
@@ -54,12 +55,13 @@ class AppMenus {
         color: Colors.amber,
         onTap: onResepObat,
       ),
-      MenuItemData(
-        icon: Icons.assignment_outlined,
-        title: 'Rekam Medis',
-        color: Colors.teal,
-        onTap: onRekamMedis,
-      ),
+      if (role.toLowerCase() != 'admin')
+        MenuItemData(
+          icon: Icons.assignment_outlined,
+          title: 'Rekam Medis',
+          color: Colors.teal,
+          onTap: onRekamMedis,
+        ),
       MenuItemData(
         icon: Icons.analytics_rounded,
         title: 'Laporan',

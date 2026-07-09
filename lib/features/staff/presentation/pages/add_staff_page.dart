@@ -259,7 +259,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
               ElevatedButton.icon(
                 onPressed: _onSave,
                 icon: const Icon(Icons.save_outlined),
-                label: const Text('Simpan Petugas Baru', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                label: const Text('Simpan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

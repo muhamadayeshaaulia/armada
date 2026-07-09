@@ -5,6 +5,7 @@ import '../../../../core/constants/app_menus.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
+import '../../../../features/staff/presentation/pages/staff_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -34,6 +35,12 @@ class DashboardPage extends StatelessWidget {
       onMedicine: () {}, // TODO: Navigator ke halaman obat
       onReport: () {}, // TODO: Navigator ke halaman laporan
       onSettings: () {}, // TODO: Navigator ke halaman pengaturan
+      onStaff: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const StaffPage()),
+        );
+      },
     );
 
     return Scaffold(

@@ -26,6 +26,7 @@ class AppMenus {
     VoidCallback? onMedicine,
     VoidCallback? onReport,
     VoidCallback? onSettings,
+    VoidCallback? onStaff,
   }) {
     return [
       MenuItemData(
@@ -51,6 +52,12 @@ class AppMenus {
         title: 'Pengaturan',
         color: AppColors.menuSettings,
         onTap: onSettings,
+      ),
+      MenuItemData(
+        icon: Icons.badge_rounded,
+        title: 'Data Petugas',
+        color: Color(0xFF9C27B0),
+        onTap: onStaff,
       ),
     ];
   }

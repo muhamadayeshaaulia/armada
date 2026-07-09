@@ -7,6 +7,7 @@ import 'firebase_options.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/staff/presentation/bloc/staff_bloc.dart';
 
 import 'core/services/notification_service.dart';
 
@@ -81,6 +82,9 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (_) => di.sl<AuthBloc>(),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<StaffBloc>(),
         ),
       ],
       child: MaterialApp(

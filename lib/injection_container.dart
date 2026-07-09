@@ -21,6 +21,24 @@ import 'features/staff/domain/usecases/delete_staff_usecase.dart';
 import 'features/staff/domain/usecases/add_staff_usecase.dart';
 import 'features/staff/presentation/bloc/staff_bloc.dart';
 
+// Import Patient
+import 'features/patient/data/datasources/patient_remote_data_source.dart';
+import 'features/patient/data/repositories/patient_repository_impl.dart';
+import 'features/patient/domain/repositories/patient_repository.dart';
+import 'features/patient/presentation/bloc/patient_bloc.dart';
+
+// Import Medicine
+import 'features/medicine/data/datasources/medicine_remote_data_source.dart';
+import 'features/medicine/data/repositories/medicine_repository_impl.dart';
+import 'features/medicine/domain/repositories/medicine_repository.dart';
+import 'features/medicine/presentation/bloc/medicine_bloc.dart';
+
+// Import Rekam Medis
+import 'features/rekam_medis/data/datasources/rekam_medis_remote_data_source.dart';
+import 'features/rekam_medis/data/repositories/rekam_medis_repository_impl.dart';
+import 'features/rekam_medis/domain/repositories/rekam_medis_repository.dart';
+import 'features/rekam_medis/presentation/bloc/rekam_medis_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -80,6 +98,21 @@ Future<void> init() async {
   sl.registerLazySingleton<StaffRemoteDataSource>(
     () => StaffRemoteDataSourceImpl(supabaseClient: sl()),
   );
+
+  //! FITUR: PATIENT
+  sl.registerFactory(() => PatientBloc(repository: sl()));
+  sl.registerLazySingleton<PatientRepository>(() => PatientRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<PatientRemoteDataSource>(() => PatientRemoteDataSourceImpl(supabaseClient: sl()));
+
+  //! FITUR: MEDICINE
+  sl.registerFactory(() => MedicineBloc(repository: sl()));
+  sl.registerLazySingleton<MedicineRepository>(() => MedicineRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<MedicineRemoteDataSource>(() => MedicineRemoteDataSourceImpl(supabaseClient: sl()));
+
+  //! FITUR: REKAM MEDIS
+  sl.registerFactory(() => RekamMedisBloc(repository: sl()));
+  sl.registerLazySingleton<RekamMedisRepository>(() => RekamMedisRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<RekamMedisRemoteDataSource>(() => RekamMedisRemoteDataSourceImpl(supabaseClient: sl()));
 
   //! EXTERNAL
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);

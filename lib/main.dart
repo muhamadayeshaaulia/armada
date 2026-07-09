@@ -8,6 +8,12 @@ import 'features/auth/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/staff/presentation/bloc/staff_bloc.dart';
+import 'features/patient/presentation/bloc/patient_bloc.dart';
+import 'features/patient/presentation/bloc/patient_event.dart';
+import 'features/medicine/presentation/bloc/medicine_bloc.dart';
+import 'features/medicine/presentation/bloc/medicine_event.dart';
+import 'features/rekam_medis/presentation/bloc/rekam_medis_bloc.dart';
+import 'features/rekam_medis/presentation/bloc/rekam_medis_event.dart';
 
 import 'core/services/notification_service.dart';
 
@@ -85,6 +91,15 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => di.sl<StaffBloc>(),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<PatientBloc>()..add(LoadPatientsEvent()),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<MedicineBloc>()..add(LoadMedicinesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<RekamMedisBloc>()..add(LoadRekamMedisEvent()),
         ),
       ],
       child: MaterialApp(

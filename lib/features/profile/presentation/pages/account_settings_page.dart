@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/services/notification_service.dart';
@@ -28,15 +29,30 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   final LocalAuthentication _auth = LocalAuthentication();
   bool _biometricEnabled = false;
   bool _isLoading = true;
+  Map<String, dynamic> _profileData = {};
 
   @override
   void initState() {
     super.initState();
+    _profileData = Map<String, dynamic>.from(widget.initialData);
     _loadBiometricState();
   }
 
   Future<void> _loadBiometricState() async {
     final enabled = await NotificationPrefs.isBiometricEnabled();
+    if (_profileData.isEmpty) {
+      final table = widget.role == 'admin' ? 'admins' : 'dokters';
+      try {
+        final response = await Supabase.instance.client
+            .from(table)
+            .select()
+            .eq('id', widget.uid)
+            .maybeSingle();
+        if (response != null) {
+          _profileData = response;
+        }
+      } catch (_) {}
+    }
     if (mounted) {
       setState(() {
         _biometricEnabled = enabled;
@@ -141,7 +157,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                             builder: (context) => EditProfilePage(
                               uid: widget.uid,
                               role: widget.role,
-                              initialData: widget.initialData,
+                              initialData: _profileData,
                             ),
                           ),
                         );

@@ -25,6 +25,8 @@ class AppMenus {
     VoidCallback? onPatient,
     VoidCallback? onMedicine,
     VoidCallback? onReport,
+    VoidCallback? onRekamMedis,
+    VoidCallback? onResepObat,
     VoidCallback? onSettings,
     VoidCallback? onStaff,
   }) {
@@ -48,6 +50,18 @@ class AppMenus {
         onTap: onReport,
       ),
       MenuItemData(
+        icon: Icons.assignment_outlined,
+        title: 'Rekam Medis',
+        color: Colors.teal,
+        onTap: onRekamMedis,
+      ),
+      MenuItemData(
+        icon: Icons.receipt_long_rounded,
+        title: 'Resep Obat',
+        color: Colors.amber,
+        onTap: onResepObat,
+      ),
+      MenuItemData(
         icon: Icons.settings_rounded,
         title: 'Pengaturan',
         color: AppColors.menuSettings,
@@ -56,7 +70,7 @@ class AppMenus {
       MenuItemData(
         icon: Icons.badge_rounded,
         title: 'Data Petugas',
-        color: Color(0xFF9C27B0),
+        color: const Color(0xFF9C27B0),
         onTap: onStaff,
       ),
     ];

@@ -19,8 +19,6 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
-  // ─── KONFIGURASI NAVIGASI ───────────────────────────────────────────────
-  // Tambah tab baru? Cukup tambah NavItemData di sini.
   late final List<NavItemData> _navItems = [
     NavItemData(
       icon: Icons.home_outlined,
@@ -41,7 +39,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       page: const ProfilePage(),
     ),
   ];
-  // ────────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {

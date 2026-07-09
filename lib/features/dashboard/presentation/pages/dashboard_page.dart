@@ -6,6 +6,11 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/staff/presentation/pages/staff_page.dart';
+import '../../../../features/patient/presentation/pages/patient_page.dart';
+import '../../../../features/medicine/presentation/pages/medicine_page.dart';
+import '../../../../features/rekam_medis/presentation/pages/laporan_page.dart';
+import '../../../../features/rekam_medis/presentation/pages/resep_obat_page.dart';
+import '../../../../features/profile/presentation/pages/account_settings_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -29,12 +34,59 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil daftar menu dari AppMenus (tambah navigasi di sini nanti)
+    final authState = context.read<AuthBloc>().state;
+    String uid = '';
+    String role = '';
+    if (authState is AuthAuthenticated) {
+      uid = authState.user.uid;
+      role = authState.user.role;
+    }
+
     final menus = AppMenus.getDashboardMenus(
-      onPatient: () {}, // TODO: Navigator ke halaman pasien
-      onMedicine: () {}, // TODO: Navigator ke halaman obat
-      onReport: () {}, // TODO: Navigator ke halaman laporan
-      onSettings: () {}, // TODO: Navigator ke halaman pengaturan
+      onPatient: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PatientPage()),
+        );
+      },
+      onMedicine: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const MedicinePage()),
+        );
+      },
+      onReport: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LaporanPage()),
+        );
+      },
+      onRekamMedis: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LaporanPage()),
+        );
+      },
+      onResepObat: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ResepObatPage()),
+        );
+      },
+      onSettings: () {
+        if (uid.isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AccountSettingsPage(
+                uid: uid,
+                role: role,
+                initialData: const {},
+              ),
+            ),
+          );
+        }
+      },
       onStaff: () {
         Navigator.push(
           context,

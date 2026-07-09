@@ -5,6 +5,8 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'onboarding_page.dart';
 import '../../../../features/main/presentation/pages/main_navigation_page.dart';
+import '../../../../core/services/notification_prefs.dart';
+import 'biometric_auth_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -24,13 +26,22 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is AuthAuthenticated) {
-          // User masih login → langsung ke dashboard
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MainNavigationPage()),
-          );
+          // Cek apakah autentikasi biometrik aktif
+          final isBioEnabled = await NotificationPrefs.isBiometricEnabled();
+          if (!mounted) return;
+          if (isBioEnabled) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const BiometricAuthPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const MainNavigationPage()),
+            );
+          }
         } else if (state is AuthUnauthenticated) {
           // User belum / sudah logout → ke onboarding
           Navigator.pushReplacement(

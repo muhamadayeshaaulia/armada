@@ -4,8 +4,12 @@ class NotificationPrefs {
   static const String keyNotifUmum = 'notif_umum';
   static const String keyNotifAutentikasi = 'notif_autentikasi';
   static const String keyNotifKeamanan = 'notif_keamanan';
+  static const String keyBiometricEnabled = 'biometric_enabled';
 
   // ── Getters ──────────────────────────────────────────
+  static Future<bool> isBiometricEnabled() async =>
+      (await SharedPreferences.getInstance()).getBool(keyBiometricEnabled) ?? false;
+
   static Future<bool> isUmumNotifEnabled() async =>
       (await SharedPreferences.getInstance()).getBool(keyNotifUmum) ?? true;
 
@@ -24,4 +28,7 @@ class NotificationPrefs {
 
   static Future<void> setKeamananNotif(bool v) async =>
       (await SharedPreferences.getInstance()).setBool(keyNotifKeamanan, v);
+
+  static Future<void> setBiometricEnabled(bool v) async =>
+      (await SharedPreferences.getInstance()).setBool(keyBiometricEnabled, v);
 }

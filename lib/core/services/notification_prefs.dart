@@ -32,3 +32,4 @@ class NotificationPrefs {
   static Future<void> setBiometricEnabled(bool v) async =>
       (await SharedPreferences.getInstance()).setBool(keyBiometricEnabled, v);
 }
+

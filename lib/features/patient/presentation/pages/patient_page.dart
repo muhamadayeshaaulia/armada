@@ -65,30 +65,34 @@ class _PatientPageState extends State<PatientPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundPage,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(28),
-                  bottomRight: Radius.circular(28),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Data Pasien', style: AppTextStyles.headerTitle),
-                  const SizedBox(height: 4),
-                  Text('Kelola & cari rekam data demografi pasien', style: AppTextStyles.headerSubtitle),
-                ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
               ),
             ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Data Pasien', style: AppTextStyles.headerTitle),
+                    const SizedBox(height: 4),
+                    Text('Kelola & cari rekam data demografi pasien', style: AppTextStyles.headerSubtitle),
+                  ],
+                ),
+              ),
+            ),
+          ),
 
             // Search Bar
             Padding(
@@ -279,7 +283,6 @@ class _PatientPageState extends State<PatientPage> {
             ),
           ],
         ),
-      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
